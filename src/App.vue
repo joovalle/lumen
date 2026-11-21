@@ -2,6 +2,7 @@
 import AppNav from '@/components/shell/AppNav.vue'
 import CommandPalette from '@/components/shell/CommandPalette.vue'
 import ToastHost from '@/components/shell/ToastHost.vue'
+import VerseImageStudio from '@/components/share/VerseImageStudio.vue'
 </script>
 
 <template>
@@ -11,6 +12,7 @@ import ToastHost from '@/components/shell/ToastHost.vue'
       <RouterView />
     </div>
     <CommandPalette />
+    <VerseImageStudio />
     <ToastHost />
   </div>
 </template>

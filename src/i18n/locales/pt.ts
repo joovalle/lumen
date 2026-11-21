@@ -2,7 +2,7 @@ import type es from './es'
 
 export default {
   app: { tagline: 'A Palavra, com excelência' },
-  nav: { read: 'Ler', search: 'Buscar', library: 'Biblioteca', notes: 'Notas', settings: 'Ajustes', about: 'Sobre' },
+  nav: { today: 'Hoje', read: 'Ler', search: 'Buscar', library: 'Biblioteca', notes: 'Notas', settings: 'Ajustes', about: 'Sobre' },
   common: {
     close: 'Fechar', cancel: 'Cancelar', save: 'Salvar', delete: 'Excluir', back: 'Voltar', download: 'Baixar',
     installed: 'Instalado', loading: 'Carregando…', retry: 'Tentar de novo', more: 'Ver mais', copy: 'Copiar', share: 'Compartilhar',
@@ -19,9 +19,21 @@ export default {
     goLibrary: 'Ir para a biblioteca', swipeHint: 'Deslize para mudar de capítulo',
   },
   selection: {
-    count: 'Nenhum versículo | 1 versículo | {n} versículos', highlight: 'Destacar', clearHighlight: 'Remover destaque',
+    image: 'Imagem', count: 'Nenhum versículo | 1 versículo | {n} versículos', highlight: 'Destacar', clearHighlight: 'Remover destaque',
     note: 'Nota', bookmark: 'Marcador', refs: 'Referências', compare: 'Comparar', clear: 'Limpar seleção',
     copied: 'Texto copiado', bookmarked: 'Marcador salvo', unbookmarked: 'Marcador removido',
+  },
+  today: {
+    morning: 'Bom dia', afternoon: 'Boa tarde', evening: 'Boa noite', votd: 'Versículo do dia',
+    createImage: 'Criar imagem', readChapter: 'Ler o capítulo', continue: 'Continuar lendo', recent: 'Leituras recentes',
+  },
+  share: {
+    title: 'Criar imagem', format: 'Formato', formats: { story: 'Story', portrait: 'Vertical', square: 'Quadrado' },
+    style: 'Estilo', styles: { dawn: 'Amanhecer', night: 'Noite', parchment: 'Pergaminho', olive: 'Oliveira', minimal: 'Minimal', ink: 'Tinta', photo: 'Sua foto' },
+    font: 'Letra', fonts: { serif: 'Serif', italic: 'Itálico', sans: 'Sans' }, choosePhoto: 'Escolher outra foto',
+    signature: 'Assinatura', signaturePlaceholder: 'Nome da sua igreja (opcional)', download: 'Baixar', saved: 'Imagem baixada',
+    hint: 'Ao compartilhar, escolha Instagram, WhatsApp (status), TikTok ou Facebook no menu do seu celular.',
+    long: 'A passagem é longa e ficará com letra pequena. Para redes sociais, menos versículos ficam melhores.',
   },
   colors: { gold: 'Ouro', mint: 'Menta', sky: 'Céu', lilac: 'Lilás', rose: 'Rosa' },
   picker: {

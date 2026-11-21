@@ -2,7 +2,7 @@ import type es from './es'
 
 export default {
   app: { tagline: 'The Word, with excellence' },
-  nav: { read: 'Read', search: 'Search', library: 'Library', notes: 'Notes', settings: 'Settings', about: 'About' },
+  nav: { today: 'Today', read: 'Read', search: 'Search', library: 'Library', notes: 'Notes', settings: 'Settings', about: 'About' },
   common: {
     close: 'Close', cancel: 'Cancel', save: 'Save', delete: 'Delete', back: 'Back', download: 'Download',
     installed: 'Installed', loading: 'Loading…', retry: 'Retry', more: 'Show more', copy: 'Copy', share: 'Share',
@@ -19,9 +19,21 @@ export default {
     goLibrary: 'Go to library', swipeHint: 'Swipe to change chapter',
   },
   selection: {
-    count: 'No verses | 1 verse | {n} verses', highlight: 'Highlight', clearHighlight: 'Remove highlight',
+    image: 'Image', count: 'No verses | 1 verse | {n} verses', highlight: 'Highlight', clearHighlight: 'Remove highlight',
     note: 'Note', bookmark: 'Bookmark', refs: 'References', compare: 'Compare', clear: 'Clear selection',
     copied: 'Text copied', bookmarked: 'Bookmark saved', unbookmarked: 'Bookmark removed',
+  },
+  today: {
+    morning: 'Good morning', afternoon: 'Good afternoon', evening: 'Good evening', votd: 'Verse of the day',
+    createImage: 'Create image', readChapter: 'Read the chapter', continue: 'Continue reading', recent: 'Recent readings',
+  },
+  share: {
+    title: 'Create image', format: 'Format', formats: { story: 'Story', portrait: 'Portrait', square: 'Square' },
+    style: 'Style', styles: { dawn: 'Dawn', night: 'Night', parchment: 'Parchment', olive: 'Olive', minimal: 'Minimal', ink: 'Ink', photo: 'Your photo' },
+    font: 'Type', fonts: { serif: 'Serif', italic: 'Italic', sans: 'Sans' }, choosePhoto: 'Choose another photo',
+    signature: 'Signature', signaturePlaceholder: 'Your church name (optional)', download: 'Download', saved: 'Image downloaded',
+    hint: 'When sharing, pick Instagram, WhatsApp (status), TikTok or Facebook from your phone’s menu.',
+    long: 'This passage is long and will use small text. For social media, fewer verses read better.',
   },
   colors: { gold: 'Gold', mint: 'Mint', sky: 'Sky', lilac: 'Lilac', rose: 'Rose' },
   picker: {

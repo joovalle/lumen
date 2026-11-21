@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Bookmark, BookmarkCheck, Copy, Eraser, GitCompare, Link2, Share2, StickyNote, X } from 'lucide-vue-next'
+import { Bookmark, BookmarkCheck, Copy, Eraser, GitCompare, Image as ImageIcon, Link2, Share2, StickyNote, X } from 'lucide-vue-next'
+import { passageText } from '@/composables/passageText'
+import { openShareStudio } from '@/composables/shareStudio'
 import { engine } from '@/core/engine/client'
 import { formatVerseList, verseKey } from '@/core/reference'
 import { HIGHLIGHT_COLORS, type HighlightColor } from '@/core/storage/db'
@@ -17,7 +19,7 @@ const notes = useAnnotations()
 const library = useLibrary()
 const settings = useSettings()
 const { t } = useI18n()
-const { bookName } = useLocale()
+const { bookName, lang } = useLocale()
 
 const label = computed(() => `${bookName(reader.passage.book)} ${reader.passage.chapter}:${formatVerseList(reader.selection)}`)
 const allBookmarked = computed(() => reader.selectedKeys.every((k) => notes.bookmarks.has(k)))
@@ -38,6 +40,12 @@ async function selectedText(): Promise<string> {
   )
   const abbr = library.get(id)?.info.abbreviation ?? ''
   return `«${parts.join(' ')}»\n— ${label.value} ${abbr ? `(${abbr})` : ''}`.trim()
+}
+
+async function makeImage() {
+  const id = settings.prefs.bibles[0]
+  const p = await passageText(id, reader.passage.book, reader.passage.chapter, reader.selection, lang.value)
+  openShareStudio(p.text, `${p.label} · ${p.abbreviation}`)
 }
 
 async function copy() {
@@ -77,6 +85,7 @@ async function bookmark() {
           <button class="dot erase" :title="$t('selection.clearHighlight')" :aria-label="$t('selection.clearHighlight')" @click="highlight(null)"><Eraser /></button>
         </div>
         <span class="sep" />
+        <button class="act" @click="makeImage"><ImageIcon /><span>{{ $t('selection.image') }}</span></button>
         <button class="act" @click="reader.openStudy('notes')"><StickyNote /><span>{{ $t('selection.note') }}</span></button>
         <button class="act" @click="reader.openStudy('refs')"><Link2 /><span>{{ $t('selection.refs') }}</span></button>
         <button class="act" @click="reader.openStudy('compare')"><GitCompare /><span>{{ $t('selection.compare') }}</span></button>

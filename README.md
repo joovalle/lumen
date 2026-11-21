@@ -15,6 +15,8 @@ Lumen es una aplicación **libre y gratuita** para leer y estudiar la Biblia, in
 
 | Área | Funciones |
 |---|---|
+| Hoy | Pantalla de inicio con saludo, **versículo del día** (234 pasajes, igual para todos cada día, en tu versión) y «continuar leyendo» |
+| Imágenes para compartir | Crea imágenes del versículo para **historias de Instagram, estados de WhatsApp y TikTok** (1080×1920), publicaciones verticales y cuadradas: 6 estilos + tu propia foto, 3 tipografías y firma con el nombre de tu iglesia. Se generan en el teléfono y se comparten desde su menú |
 | Lectura | Modo párrafo o versículo por línea, letra capital, números de versículo, números Strong (si el módulo los trae), palabras de Jesús en rojo (módulos GBF) |
 | Navegación | Selector de libros por categorías, «Jn 3:16» directo, paleta de comandos (`Ctrl/⌘ K`), flechas ← →, deslizar en móvil, historial |
 | Estudio | Panel lateral con referencias cruzadas (100 000+, OpenBible.info), comparación de versiones, notas, comentarios y diccionario; clic en un número Strong → léxico |

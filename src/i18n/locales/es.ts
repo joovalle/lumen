@@ -1,6 +1,6 @@
 export default {
   app: { tagline: 'La Palabra, con excelencia' },
-  nav: { read: 'Leer', search: 'Buscar', library: 'Biblioteca', notes: 'Notas', settings: 'Ajustes', about: 'Acerca de' },
+  nav: { today: 'Hoy', read: 'Leer', search: 'Buscar', library: 'Biblioteca', notes: 'Notas', settings: 'Ajustes', about: 'Acerca de' },
   common: {
     close: 'Cerrar', cancel: 'Cancelar', save: 'Guardar', delete: 'Eliminar', back: 'Volver', download: 'Descargar',
     installed: 'Instalado', loading: 'Cargando…', retry: 'Reintentar', more: 'Ver más', copy: 'Copiar', share: 'Compartir',
@@ -17,9 +17,21 @@ export default {
     goLibrary: 'Ir a la biblioteca', swipeHint: 'Desliza para cambiar de capítulo',
   },
   selection: {
-    count: 'Ningún versículo | 1 versículo | {n} versículos', highlight: 'Subrayar', clearHighlight: 'Quitar subrayado',
+    image: 'Imagen', count: 'Ningún versículo | 1 versículo | {n} versículos', highlight: 'Subrayar', clearHighlight: 'Quitar subrayado',
     note: 'Nota', bookmark: 'Marcador', refs: 'Referencias', compare: 'Comparar', clear: 'Quitar selección',
     copied: 'Texto copiado', bookmarked: 'Marcador guardado', unbookmarked: 'Marcador quitado',
+  },
+  today: {
+    morning: 'Buenos días', afternoon: 'Buenas tardes', evening: 'Buenas noches', votd: 'Versículo del día',
+    createImage: 'Crear imagen', readChapter: 'Leer el capítulo', continue: 'Continuar leyendo', recent: 'Lecturas recientes',
+  },
+  share: {
+    title: 'Crear imagen', format: 'Formato', formats: { story: 'Historia', portrait: 'Vertical', square: 'Cuadrado' },
+    style: 'Estilo', styles: { dawn: 'Amanecer', night: 'Noche', parchment: 'Pergamino', olive: 'Olivo', minimal: 'Minimal', ink: 'Tinta', photo: 'Tu foto' },
+    font: 'Letra', fonts: { serif: 'Serif', italic: 'Cursiva', sans: 'Sans' }, choosePhoto: 'Elegir otra foto',
+    signature: 'Firma', signaturePlaceholder: 'Nombre de tu iglesia (opcional)', download: 'Descargar', saved: 'Imagen descargada',
+    hint: 'Al compartir, elige Instagram, WhatsApp (estado), TikTok o Facebook en el menú de tu teléfono.',
+    long: 'El pasaje es largo y se verá con letra pequeña. Para redes, se lee mejor con menos versículos.',
   },
   colors: { gold: 'Oro', mint: 'Menta', sky: 'Cielo', lilac: 'Lila', rose: 'Rosa' },
   picker: {

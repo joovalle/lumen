@@ -1,19 +1,20 @@
 <script setup lang="ts">
-import { BookOpen, HandHeart, Library, NotebookPen, Search, Settings } from 'lucide-vue-next'
+import { BookOpen, HandHeart, Library, NotebookPen, Search, Settings, Sunrise } from 'lucide-vue-next'
 import LumenLogo from '@/components/common/LumenLogo.vue'
 
 const items = [
-  { to: '/read', icon: BookOpen, label: 'nav.read', match: 'read' },
-  { to: '/search', icon: Search, label: 'nav.search', match: 'search' },
-  { to: '/library', icon: Library, label: 'nav.library', match: 'library' },
-  { to: '/notes', icon: NotebookPen, label: 'nav.notes', match: 'notes' },
-  { to: '/settings', icon: Settings, label: 'nav.settings', match: 'settings' },
+  { to: '/today', icon: Sunrise, label: 'nav.today', match: 'today', mobile: true },
+  { to: '/read', icon: BookOpen, label: 'nav.read', match: 'read', mobile: true },
+  { to: '/search', icon: Search, label: 'nav.search', match: 'search', mobile: true },
+  { to: '/library', icon: Library, label: 'nav.library', match: 'library', mobile: false },
+  { to: '/notes', icon: NotebookPen, label: 'nav.notes', match: 'notes', mobile: true },
+  { to: '/settings', icon: Settings, label: 'nav.settings', match: 'settings', mobile: true },
 ]
 </script>
 
 <template>
   <nav class="rail" aria-label="Lumen">
-    <RouterLink to="/read" class="brand" aria-label="Lumen"><LumenLogo :size="40" /></RouterLink>
+    <RouterLink to="/today" class="brand" aria-label="Lumen"><LumenLogo :size="40" /></RouterLink>
     <div class="items">
       <RouterLink v-for="it in items" :key="it.to" :to="it.to" class="item" :class="{ active: $route.name === it.match }">
         <component :is="it.icon" :stroke-width="1.8" />
@@ -27,7 +28,7 @@ const items = [
   </nav>
 
   <nav class="bottom" aria-label="Lumen">
-    <RouterLink v-for="it in items" :key="it.to" :to="it.to" class="tab" :class="{ active: $route.name === it.match }">
+    <RouterLink v-for="it in items.filter((i) => i.mobile)" :key="it.to" :to="it.to" class="tab" :class="{ active: $route.name === it.match }">
       <component :is="it.icon" :stroke-width="1.8" />
       <span>{{ $t(it.label) }}</span>
     </RouterLink>

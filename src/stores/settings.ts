@@ -6,6 +6,9 @@ import type { Passage } from '@/core/reference'
 
 export type ThemeChoice = 'auto' | 'light' | 'sepia' | 'dark'
 export type StudyTab = 'refs' | 'compare' | 'notes' | 'commentary' | 'dictionary'
+export type ShareFormat = 'story' | 'square' | 'portrait'
+export type ShareFont = 'serif' | 'italic' | 'sans'
+export type ShareTemplate = 'dawn' | 'night' | 'parchment' | 'olive' | 'minimal' | 'ink' | 'photo'
 
 export interface Prefs {
   theme: ThemeChoice
@@ -25,6 +28,12 @@ export interface Prefs {
   dictionaryId: string | null
   last: Passage
   history: Passage[]
+  /** Imágenes para compartir */
+  shareFormat: ShareFormat
+  shareTemplate: ShareTemplate
+  shareFont: ShareFont
+  /** Texto al pie de las imágenes (p. ej. el nombre de la iglesia); vacío = «Lumen» */
+  shareSignature: string
 }
 
 const DEFAULTS: Prefs = {
@@ -44,6 +53,10 @@ const DEFAULTS: Prefs = {
   dictionaryId: null,
   last: { book: 43, chapter: 1 },
   history: [],
+  shareFormat: 'story',
+  shareTemplate: 'dawn',
+  shareFont: 'serif',
+  shareSignature: '',
 }
 
 export const useSettings = defineStore('settings', () => {
@@ -73,7 +86,8 @@ export const useSettings = defineStore('settings', () => {
   }
 
   function reset() {
-    const keep = { bibles: prefs.value.bibles, last: prefs.value.last, locale: prefs.value.locale }
+    const p = prefs.value
+    const keep = { bibles: p.bibles, last: p.last, history: p.history, locale: p.locale, shareSignature: p.shareSignature }
     prefs.value = { ...DEFAULTS, ...keep }
   }
 

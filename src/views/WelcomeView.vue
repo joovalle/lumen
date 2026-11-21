@@ -49,7 +49,7 @@ async function start() {
       xrefs.value && xrefEntry.value ? library.install(xrefEntry.value) : Promise.resolve(),
     ])
     settings.prefs.bibles = [bible.id]
-    void router.replace({ name: 'read', params: { book: 'John', chapter: 1 } })
+    void router.replace({ name: 'today' })
   } catch (e) {
     toast((e as Error).message, 'error', 6000)
   } finally {

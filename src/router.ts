@@ -6,7 +6,8 @@ export const router = createRouter({
   // Hash: funciona igual en cualquier hosting estático, en Capacitor y en Tauri.
   history: createWebHashHistory(),
   routes: [
-    { path: '/', redirect: '/read' },
+    { path: '/', redirect: '/today' },
+    { path: '/today', name: 'today', component: () => import('@/views/TodayView.vue') },
     { path: '/read/:book?/:chapter?', name: 'read', component: ReadView },
     { path: '/search', name: 'search', component: () => import('@/views/SearchView.vue') },
     { path: '/library', name: 'library', component: () => import('@/views/LibraryView.vue') },
@@ -22,7 +23,7 @@ export const router = createRouter({
 // Primera vez sin Biblias instaladas → pantalla de bienvenida.
 router.beforeEach((to) => {
   const library = useLibrary()
-  if (!library.bibles.length && (to.name === 'read' || to.name === 'search' || to.name === 'notes')) {
+  if (!library.bibles.length && (to.name === 'today' || to.name === 'read' || to.name === 'search' || to.name === 'notes')) {
     return { name: 'welcome' }
   }
 })

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Download, RotateCcw, Trash2, Upload } from 'lucide-vue-next'
+import { ChevronRight, Download, HandHeart, Library, RotateCcw, Trash2, Upload } from 'lucide-vue-next'
 import { LOCALES, type Locale } from '@/core/canon'
 import { engine } from '@/core/engine/client'
 import { verseKey } from '@/core/reference'
@@ -53,6 +53,11 @@ async function clearAll() {
 <template>
   <div class="page narrow">
     <h1 class="page-title">{{ $t('settings.title') }}</h1>
+
+    <nav class="links card">
+      <RouterLink to="/library" class="link"><Library /><span>{{ $t('nav.library') }}</span><ChevronRight class="chev" /></RouterLink>
+      <RouterLink to="/about" class="link"><HandHeart /><span>{{ $t('nav.about') }}</span><ChevronRight class="chev" /></RouterLink>
+    </nav>
 
     <section class="section">
       <h2 class="section-title">{{ $t('settings.appearance') }}</h2>
@@ -123,6 +128,14 @@ async function clearAll() {
 
 <style scoped>
 .narrow { max-width: 760px; }
+.links { display: none; margin-top: 22px; padding: 4px 18px; }
+.link { display: flex; align-items: center; gap: 14px; min-height: 54px; color: var(--text); font-weight: 550; }
+.link + .link { border-top: 1px solid var(--border); }
+.link:hover { text-decoration: none; color: var(--accent); }
+.link svg { width: 20px; height: 20px; color: var(--accent); }
+.link span { flex: 1; }
+.link .chev { color: var(--text-3); width: 18px; height: 18px; }
+@media (max-width: 720px) { .links { display: block; } }
 .section-title { margin-bottom: 14px; }
 .themes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 .theme { display: grid; gap: 8px; padding: 0; border: 0; background: transparent; text-align: center; }
