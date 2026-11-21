@@ -7,6 +7,8 @@
  * imágenes de terceros ni problemas de licencias.
  */
 
+import { DIVINE_CAPS } from '../typography'
+
 export type ImageFormat = 'story' | 'square' | 'portrait'
 export type ImageFont = 'serif' | 'italic' | 'sans'
 export type TemplateId = 'dawn' | 'night' | 'parchment' | 'olive' | 'minimal' | 'ink' | 'photo'
@@ -225,9 +227,6 @@ export function wrap(ctx: CanvasRenderingContext2D, text: string, maxWidth: numb
 }
 
 /** "EN el principio" → "En el principio" (las versiones antiguas usan versalitas iniciales). */
-/** Nombres divinos que algunas versiones escriben siempre en mayúsculas a propósito. */
-const DIVINE_CAPS = new Set(['JEHOVÁ', 'JEHOVA', 'SEÑOR', 'LORD', 'GOD', 'YAHVEH', 'YHWH', 'SENHOR'])
-
 export function tidyText(text: string): string {
   return text
     .replace(/^(\p{Lu})(\p{Lu}+)(?=\s+\p{Ll})/u, (all: string, a: string, b: string) =>

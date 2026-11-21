@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { Bookmark, StickyNote } from 'lucide-vue-next'
 import type { ChapterColumn } from '@/composables/chapter'
 import { useLocale } from '@/composables/locale'
+import { leadSmallCaps } from '@/core/typography'
 import { useVerseInteractions } from '@/composables/verses'
 import { useReader } from '@/stores/reader'
 import { useSettings } from '@/stores/settings'
@@ -23,7 +24,7 @@ const paragraph = computed(() => settings.prefs.layout === 'paragraph')
   >
     <header class="head">
       <p class="eyebrow">{{ column.title }}</p>
-      <h1>{{ bookName(reader.passage.book) }}<span v-if="!paragraph" class="num"> {{ reader.passage.chapter }}</span></h1>
+      <h1>{{ bookName(reader.passage.book) }}<span v-if="!paragraph" class="num">&nbsp;{{ reader.passage.chapter }}</span></h1>
     </header>
 
     <p v-if="column.error" class="notice">{{ $t('reader.loadError') }} <small>{{ column.error }}</small></p>
@@ -35,7 +36,7 @@ const paragraph = computed(() => settings.prefs.layout === 'paragraph')
         v-for="(r, i) in column.rows" :id="`v${r.verse}`" :key="r.verse"
         class="verse" :class="[classes(r.verse), { flash: flash === r.verse }]"
         :data-v="r.verse" @click="onClick(r.verse, $event)"
-      ><sup v-if="!(paragraph && i === 0)" class="vnum">{{ r.verse }}</sup><span class="vt" v-html="r.html" /><button
+      ><sup v-if="!(paragraph && i === 0)" class="vnum">{{ r.verse }}</sup><span class="vt" v-html="i === 0 ? leadSmallCaps(r.html) : r.html" /><button
           v-if="hasNote(r.verse)" class="mark note" :aria-label="$t('selection.note')" @click.stop="openNote(r.verse)"
         ><StickyNote /></button><span v-if="hasBookmark(r.verse)" class="mark"><Bookmark /></span>{{ ' ' }}</span>
     </div>
@@ -125,12 +126,14 @@ const paragraph = computed(() => settings.prefs.layout === 'paragraph')
 }
 .mark svg { width: 0.7em; height: 0.7em; }
 
+.vt :deep(.sc) { font-variant-caps: small-caps; letter-spacing: 0.03em; }
 .vt :deep(.strong) {
   font-family: var(--font-ui); font-size: 0.5em; font-weight: 600; color: var(--text-3);
   margin-left: 0.15em; cursor: help; vertical-align: 0.8em; line-height: 0;
 }
 .vt :deep(.strong:hover) { color: var(--accent); }
-.no-strong .vt :deep(.strong) { display: none; }
+.no-strong .vt :deep(.sc) { font-variant-caps: small-caps; letter-spacing: 0.03em; }
+.vt :deep(.strong) { display: none; }
 .vt :deep(.woj) { color: #a5352a; }
 :root[data-theme='dark'] .vt :deep(.woj) { color: #e98a7b; }
 .vt :deep(.note) { display: none; }

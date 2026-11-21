@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { StickyNote } from 'lucide-vue-next'
 import type { ChapterColumn } from '@/composables/chapter'
 import { useLocale } from '@/composables/locale'
+import { leadSmallCaps } from '@/core/typography'
 import { useVerseInteractions } from '@/composables/verses'
 import { useReader } from '@/stores/reader'
 import { useSettings } from '@/stores/settings'
@@ -19,7 +20,7 @@ const verses = computed(() => {
   for (const c of props.columns) for (const r of c.rows) set.add(r.verse)
   return [...set].sort((a, b) => a - b)
 })
-const lookup = computed(() => props.columns.map((c) => new Map(c.rows.map((r) => [r.verse, r.html]))))
+const lookup = computed(() => props.columns.map((c) => new Map(c.rows.map((r, i) => [r.verse, i === 0 ? leadSmallCaps(r.html) : r.html]))))
 </script>
 
 <template>
@@ -76,8 +77,10 @@ const lookup = computed(() => props.columns.map((c) => new Map(c.rows.map((r) =>
 .missing { color: var(--text-3); }
 .mark { display: grid; place-items: center; width: 20px; height: 20px; border: 0; border-radius: 6px; background: var(--accent-soft); color: var(--accent); padding: 0; }
 .mark svg { width: 12px; height: 12px; }
+.vt :deep(.sc) { font-variant-caps: small-caps; letter-spacing: 0.03em; }
 .vt :deep(.strong) { font-family: var(--font-ui); font-size: 0.55em; color: var(--text-3); vertical-align: 0.8em; line-height: 0; margin-left: 0.15em; }
-.no-strong .vt :deep(.strong) { display: none; }
+.no-strong .vt :deep(.sc) { font-variant-caps: small-caps; letter-spacing: 0.03em; }
+.vt :deep(.strong) { display: none; }
 .vt :deep(.woj) { color: #a5352a; }
 :root[data-theme='dark'] .vt :deep(.woj) { color: #e98a7b; }
 .vt :deep(.note) { display: none; }
