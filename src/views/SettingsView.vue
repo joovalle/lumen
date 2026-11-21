@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { ChevronRight, Download, HandHeart, Library, RotateCcw, Trash2, Upload } from 'lucide-vue-next'
+import { CalendarCheck, ChevronRight, Download, HandHeart, Library, RotateCcw, Trash2, Upload } from 'lucide-vue-next'
 import { LOCALES, type Locale } from '@/core/canon'
 import { engine } from '@/core/engine/client'
 import { verseKey } from '@/core/reference'
@@ -55,6 +55,7 @@ async function clearAll() {
     <h1 class="page-title">{{ $t('settings.title') }}</h1>
 
     <nav class="links card">
+      <RouterLink to="/plans" class="link"><CalendarCheck /><span>{{ $t('nav.plans') }}</span><ChevronRight class="chev" /></RouterLink>
       <RouterLink to="/library" class="link"><Library /><span>{{ $t('nav.library') }}</span><ChevronRight class="chev" /></RouterLink>
       <RouterLink to="/about" class="link"><HandHeart /><span>{{ $t('nav.about') }}</span><ChevronRight class="chev" /></RouterLink>
     </nav>

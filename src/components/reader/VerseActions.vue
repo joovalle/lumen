@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { Bookmark, BookmarkCheck, Copy, Eraser, GitCompare, Image as ImageIcon, Link2, Share2, StickyNote, X } from 'lucide-vue-next'
 import { passageText } from '@/composables/passageText'
 import { openShareStudio } from '@/composables/shareStudio'
+import { passageUrl } from '@/composables/links'
 import { engine } from '@/core/engine/client'
 import { formatVerseList, verseKey } from '@/core/reference'
 import { HIGHLIGHT_COLORS, type HighlightColor } from '@/core/storage/db'
@@ -39,7 +40,10 @@ async function selectedText(): Promise<string> {
     reader.selection.map((v) => engine().plain(id, [{ start: verseKey(book, chapter, v) }]).then(([s]) => (single ? s : `${v} ${s}`))),
   )
   const abbr = library.get(id)?.info.abbreviation ?? ''
-  return `«${parts.join(' ')}»\n— ${label.value} ${abbr ? `(${abbr})` : ''}`.trim()
+  const sel = reader.selection
+  const contiguous = sel.every((v, i) => i === 0 || v === sel[i - 1] + 1)
+  const url = passageUrl(book, chapter, sel[0], contiguous ? sel[sel.length - 1] : undefined)
+  return `«${parts.join(' ')}»\n— ${label.value}${abbr ? ` (${abbr})` : ''}\n${url}`
 }
 
 async function makeImage() {

@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { ArrowRight, BookOpen, Copy, History, Image as ImageIcon } from 'lucide-vue-next'
+import { ArrowRight, BookOpen, CalendarCheck, Copy, History, Image as ImageIcon } from 'lucide-vue-next'
 import { bookByNumber } from '@/core/canon'
 import { tidyText } from '@/core/share/verseImage'
 import { verseOfTheDay } from '@/core/votd'
@@ -10,10 +10,14 @@ import { passageTextFor, type PassageText } from '@/composables/passageText'
 import { useLocale } from '@/composables/locale'
 import { openShareStudio } from '@/composables/shareStudio'
 import { toast } from '@/composables/toast'
+import { passageUrl } from '@/composables/links'
 import { useSettings } from '@/stores/settings'
+import { usePlans } from '@/stores/plans'
+import PlanTodayCard from '@/components/plans/PlanTodayCard.vue'
 
 const router = useRouter()
 const settings = useSettings()
+const plans = usePlans()
 const { t, locale } = useI18n()
 const { lang, passage } = useLocale()
 
@@ -54,7 +58,8 @@ function share() {
 }
 async function copy() {
   if (!verse.value) return
-  await navigator.clipboard.writeText(`«${tidyText(verse.value.text)}»\n— ${reference.value}`)
+  const url = passageUrl(votd.book, votd.chapter, votd.verse, votd.verseEnd)
+  await navigator.clipboard.writeText(`«${tidyText(verse.value.text)}»\n— ${reference.value}\n${url}`)
   toast(t('selection.copied'), 'success')
 }
 const last = computed(() => settings.prefs.last)
@@ -82,6 +87,21 @@ const recent = computed(() => settings.prefs.history.slice(1, 7))
         <button class="btn" @click="read(votd.book, votd.chapter, votd.verse)"><BookOpen /> {{ $t('today.readChapter') }}</button>
         <button class="btn btn-ghost" :disabled="!verse" @click="copy"><Copy /> {{ $t('common.copy') }}</button>
       </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2 class="section-title"><CalendarCheck /> {{ $t('plans.today') }}</h2>
+        <RouterLink :to="{ name: 'plans' }" class="more">{{ $t('plans.title') }} <ArrowRight /></RouterLink>
+      </div>
+      <div v-if="plans.active.length" class="plans">
+        <PlanTodayCard v-for="p in plans.active.slice(0, 3)" :key="p.id" :plan="p" />
+      </div>
+      <RouterLink v-else :to="{ name: 'plans' }" class="plan-cta card">
+        <CalendarCheck class="cta-icon" />
+        <span>{{ $t('plans.empty') }}</span>
+        <span class="btn btn-sm">{{ $t('plans.choose') }}</span>
+      </RouterLink>
     </section>
 
     <section class="section">
@@ -145,6 +165,14 @@ footer span { color: var(--text-3); font-weight: 600; }
 .continue strong { font-family: var(--font-serif); font-size: 20px; font-weight: 600; }
 .arrow { width: 20px; height: 20px; color: var(--accent); }
 .section-title { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.section-head .section-title { margin-bottom: 0; }
+.more { display: inline-flex; align-items: center; gap: 4px; font-size: 13.5px; font-weight: 600; }
+.more svg { width: 15px; height: 15px; }
+.plans { display: grid; gap: 12px; }
+.plan-cta { display: flex; align-items: center; gap: 14px; padding: 18px 20px; color: var(--text-2); font-size: 14.5px; }
+.plan-cta:hover { text-decoration: none; border-color: var(--accent); }
+.plan-cta span:first-of-type { flex: 1; }
+.cta-icon { width: 26px; height: 26px; color: var(--accent); flex: none; }
 .section-title svg { width: 18px; height: 18px; color: var(--text-3); }
 .recent { display: flex; flex-wrap: wrap; gap: 8px; }
 .recent .chip { cursor: pointer; height: 34px; padding: 0 14px; }

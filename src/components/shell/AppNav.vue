@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { BookOpen, HandHeart, Library, NotebookPen, Search, Settings, Sunrise } from 'lucide-vue-next'
+import { BookOpen, CalendarCheck, HandHeart, Library, NotebookPen, Search, Settings, Sunrise } from 'lucide-vue-next'
 import LumenLogo from '@/components/common/LumenLogo.vue'
 
 const items = [
   { to: '/today', icon: Sunrise, label: 'nav.today', match: 'today', mobile: true },
   { to: '/read', icon: BookOpen, label: 'nav.read', match: 'read', mobile: true },
+  { to: '/plans', icon: CalendarCheck, label: 'nav.plans', match: 'plans', mobile: false },
   { to: '/search', icon: Search, label: 'nav.search', match: 'search', mobile: true },
   { to: '/library', icon: Library, label: 'nav.library', match: 'library', mobile: false },
   { to: '/notes', icon: NotebookPen, label: 'nav.notes', match: 'notes', mobile: true },
@@ -16,7 +17,7 @@ const items = [
   <nav class="rail" aria-label="Lumen">
     <RouterLink to="/today" class="brand" aria-label="Lumen"><LumenLogo :size="40" /></RouterLink>
     <div class="items">
-      <RouterLink v-for="it in items" :key="it.to" :to="it.to" class="item" :class="{ active: $route.name === it.match }">
+      <RouterLink v-for="it in items" :key="it.to" :to="it.to" class="item" :class="{ active: $route.name === it.match || (it.match === 'plans' && String($route.name).startsWith('plan')) }">
         <component :is="it.icon" :stroke-width="1.8" />
         <span>{{ $t(it.label) }}</span>
       </RouterLink>

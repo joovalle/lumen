@@ -7,6 +7,7 @@ import ReaderBar from '@/components/reader/ReaderBar.vue'
 import ChapterText from '@/components/reader/ChapterText.vue'
 import ParallelText from '@/components/reader/ParallelText.vue'
 import ChapterFooter from '@/components/reader/ChapterFooter.vue'
+import PlanFooter from '@/components/reader/PlanFooter.vue'
 import VerseActions from '@/components/reader/VerseActions.vue'
 import PassagePicker from '@/components/reader/PassagePicker.vue'
 import StudyPanel from '@/components/study/StudyPanel.vue'
@@ -23,7 +24,7 @@ const reader = useReader()
 const library = useLibrary()
 const settings = useSettings()
 
-const flash = ref<number | null>(null)
+const flash = ref<number[]>([])
 const content = ref<HTMLElement>()
 
 /** Pasaje según la URL: /read/John/3?v=16 */
@@ -46,8 +47,8 @@ function go(book: number, chapter: number, verse?: number) {
 }
 
 watch(
-  [routePassage, () => route.query.v],
-  async ([p, v]) => {
+  [routePassage, () => route.query.v, () => route.query.to],
+  async ([p, v, to]) => {
     // /read sin pasaje → se completa la URL con la última posición (sin tocar el estado aquí)
     if (!route.params.book) {
       void router.replace({ name: 'read', params: { book: bookByNumber(p.book)!.osis, chapter: p.chapter } })
@@ -59,10 +60,11 @@ watch(
     const verse = Number(v)
     if (verse) {
       await waitForText()
-      flash.value = verse
+      const end = Math.min(Math.max(Number(to) || verse, verse), verse + 50)
+      flash.value = Array.from({ length: end - verse + 1 }, (_, i) => verse + i)
       reader.focus = verse
       document.getElementById(`v${verse}`)?.scrollIntoView({ block: 'center', behavior: changed ? 'auto' : 'smooth' })
-      setTimeout(() => (flash.value = null), 1900)
+      setTimeout(() => (flash.value = []), 2200)
     } else if (changed) {
       window.scrollTo({ top: 0 })
       reader.focus = null
@@ -126,6 +128,7 @@ const { direction, lengthX, lengthY } = useSwipe(content, {
             <ParallelText v-if="parallel" :key="`p${reader.passage.book}-${reader.passage.chapter}`" :columns="columns" :flash="flash" />
             <ChapterText v-else :key="`s${reader.passage.book}-${reader.passage.chapter}`" :column="columns[0]" :flash="flash" />
           </Transition>
+          <PlanFooter />
           <ChapterFooter @go="go" />
         </template>
         <div v-else-if="loading" class="empty"><LoaderCircle class="spin" /></div>

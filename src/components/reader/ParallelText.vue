@@ -8,7 +8,7 @@ import { useVerseInteractions } from '@/composables/verses'
 import { useReader } from '@/stores/reader'
 import { useSettings } from '@/stores/settings'
 
-const props = defineProps<{ columns: ChapterColumn[]; flash: number | null }>()
+const props = defineProps<{ columns: ChapterColumn[]; flash: number[] }>()
 const reader = useReader()
 const settings = useSettings()
 const { bookName } = useLocale()
@@ -35,7 +35,7 @@ const lookup = computed(() => props.columns.map((c) => new Map(c.rows.map((r, i)
       </div>
       <div
         v-for="v in verses" :id="`v${v}`" :key="v"
-        class="row verse" :class="[classes(v), { flash: flash === v }]" @click="onClick(v, $event)"
+        class="row verse" :class="[classes(v), { flash: flash.includes(v) }]" @click="onClick(v, $event)"
       >
         <span class="gutter vnum">{{ v }}<button v-if="hasNote(v)" class="mark" @click.stop="openNote(v)"><StickyNote /></button></span>
         <div v-for="(c, i) in columns" :key="c.id" class="cell" :dir="c.rtl ? 'rtl' : 'ltr'">

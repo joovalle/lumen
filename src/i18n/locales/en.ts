@@ -2,7 +2,7 @@ import type es from './es'
 
 export default {
   app: { tagline: 'The Word, with excellence' },
-  nav: { today: 'Today', read: 'Read', search: 'Search', library: 'Library', notes: 'Notes', settings: 'Settings', about: 'About' },
+  nav: { today: 'Today', read: 'Read', plans: 'Plans', search: 'Search', library: 'Library', notes: 'Notes', settings: 'Settings', about: 'About' },
   common: {
     close: 'Close', cancel: 'Cancel', save: 'Save', delete: 'Delete', back: 'Back', download: 'Download',
     installed: 'Installed', loading: 'Loading…', retry: 'Retry', more: 'Show more', copy: 'Copy', share: 'Share',
@@ -34,6 +34,30 @@ export default {
     signature: 'Signature', signaturePlaceholder: 'Your church name (optional)', download: 'Download', saved: 'Image downloaded',
     hint: 'When sharing, pick Instagram, WhatsApp (status), TikTok or Facebook from your phone’s menu.',
     long: 'This passage is long and will use small text. For social media, fewer verses read better.',
+  },
+  plans: {
+    title: 'Reading plans', subtitle: 'Read the Bible consistently, on your own or with your group.', mine: 'My plans',
+    start: 'Start a plan', group: 'Plan for your group',
+    groupText: 'Choose what to read and when to start, then share the link on WhatsApp: everyone reads the same each day.',
+    name: 'Plan name', namePlaceholder: 'E.g. Romans in December', from: 'From', to: 'To',
+    perDay: 'Chapters per day', startDate: 'Start date', summary: '{days} days · ends {end}',
+    create: 'Create and share', day: 'Day {n}', dayOf: 'Day {n} of {total}', days: '{n} days',
+    behind: 'Up to date | 1 day pending | {n} days pending', completed: 'Read', doneToday: 'Today’s reading done',
+    notStarted: 'Starts {date}', read: 'Read', continue: 'Continue', share: 'Invite', remove: 'Delete plan',
+    removeConfirm: 'Delete the plan “{name}” and its progress?', removed: 'Plan deleted',
+    shareText: 'Join me reading the Bible: “{name}” on Lumen. It starts {date}.', linkCopied: 'Link copied',
+    markRead: 'Mark as read', next: 'Read, next', fromPlan: 'Day {n} · reading {i} of {total}',
+    dayComplete: 'You finished today’s reading! 🙌', today: 'Today’s reading',
+    empty: 'Start a reading plan and we’ll walk with you every day.', choose: 'Choose a plan',
+    joinTitle: 'You’ve been invited to a reading plan', join: 'Join the plan', joined: 'You’re already in this plan.', open: 'Open the plan',
+    invalid: 'This plan link is invalid or incomplete.', startedAgo: 'This plan started on {date}. You can catch up at your own pace.',
+    presets: {
+      bible365: { name: 'The Bible in a year', desc: 'All of Scripture, from Genesis to Revelation.' },
+      nt90: { name: 'New Testament in 90 days', desc: 'About three chapters a day.' },
+      gospels30: { name: 'The Gospels in 30 days', desc: 'The life of Jesus in Matthew, Mark, Luke and John.' },
+      psprov31: { name: 'Psalms and Proverbs in a month', desc: 'Five psalms and one proverb each day.' },
+      ot270: { name: 'Old Testament in 9 months', desc: 'Genesis to Malachi, about three chapters a day.' },
+    },
   },
   colors: { gold: 'Gold', mint: 'Mint', sky: 'Sky', lilac: 'Lilac', rose: 'Rose' },
   picker: {

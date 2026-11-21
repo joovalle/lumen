@@ -8,7 +8,7 @@ import { useVerseInteractions } from '@/composables/verses'
 import { useReader } from '@/stores/reader'
 import { useSettings } from '@/stores/settings'
 
-const props = defineProps<{ column: ChapterColumn; flash: number | null }>()
+defineProps<{ column: ChapterColumn; flash: number[] }>()
 const reader = useReader()
 const settings = useSettings()
 const { bookName } = useLocale()
@@ -34,7 +34,7 @@ const paragraph = computed(() => settings.prefs.layout === 'paragraph')
       <span v-if="paragraph" class="dropcap" aria-hidden="true">{{ reader.passage.chapter }}</span>
       <span
         v-for="(r, i) in column.rows" :id="`v${r.verse}`" :key="r.verse"
-        class="verse" :class="[classes(r.verse), { flash: flash === r.verse }]"
+        class="verse" :class="[classes(r.verse), { flash: flash.includes(r.verse) }]"
         :data-v="r.verse" @click="onClick(r.verse, $event)"
       ><sup v-if="!(paragraph && i === 0)" class="vnum">{{ r.verse }}</sup><span class="vt" v-html="i === 0 ? leadSmallCaps(r.html) : r.html" /><button
           v-if="hasNote(r.verse)" class="mark note" :aria-label="$t('selection.note')" @click.stop="openNote(r.verse)"

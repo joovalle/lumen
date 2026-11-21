@@ -2,7 +2,7 @@ import type es from './es'
 
 export default {
   app: { tagline: 'A Palavra, com excelência' },
-  nav: { today: 'Hoje', read: 'Ler', search: 'Buscar', library: 'Biblioteca', notes: 'Notas', settings: 'Ajustes', about: 'Sobre' },
+  nav: { today: 'Hoje', read: 'Ler', plans: 'Planos', search: 'Buscar', library: 'Biblioteca', notes: 'Notas', settings: 'Ajustes', about: 'Sobre' },
   common: {
     close: 'Fechar', cancel: 'Cancelar', save: 'Salvar', delete: 'Excluir', back: 'Voltar', download: 'Baixar',
     installed: 'Instalado', loading: 'Carregando…', retry: 'Tentar de novo', more: 'Ver mais', copy: 'Copiar', share: 'Compartilhar',
@@ -34,6 +34,30 @@ export default {
     signature: 'Assinatura', signaturePlaceholder: 'Nome da sua igreja (opcional)', download: 'Baixar', saved: 'Imagem baixada',
     hint: 'Ao compartilhar, escolha Instagram, WhatsApp (status), TikTok ou Facebook no menu do seu celular.',
     long: 'A passagem é longa e ficará com letra pequena. Para redes sociais, menos versículos ficam melhores.',
+  },
+  plans: {
+    title: 'Planos de leitura', subtitle: 'Leia a Bíblia com constância, sozinho ou com seu grupo.', mine: 'Meus planos',
+    start: 'Começar um plano', group: 'Plano para o seu grupo',
+    groupText: 'Escolha o que ler e quando começar, e compartilhe o link pelo WhatsApp: todos leem o mesmo a cada dia.',
+    name: 'Nome do plano', namePlaceholder: 'Ex.: Romanos em dezembro', from: 'De', to: 'Até',
+    perDay: 'Capítulos por dia', startDate: 'Data de início', summary: '{days} dias · termina em {end}',
+    create: 'Criar e compartilhar', day: 'Dia {n}', dayOf: 'Dia {n} de {total}', days: '{n} dias',
+    behind: 'Em dia | 1 dia pendente | {n} dias pendentes', completed: 'Lido', doneToday: 'Leitura de hoje concluída',
+    notStarted: 'Começa em {date}', read: 'Ler', continue: 'Continuar', share: 'Convidar', remove: 'Excluir plano',
+    removeConfirm: 'Excluir o plano “{name}” e seu progresso?', removed: 'Plano excluído',
+    shareText: 'Leia a Bíblia comigo: “{name}” no Lumen. Começa em {date}.', linkCopied: 'Link copiado',
+    markRead: 'Marcar como lido', next: 'Lido, próximo', fromPlan: 'Dia {n} · leitura {i} de {total}',
+    dayComplete: 'Você concluiu a leitura de hoje! 🙌', today: 'Sua leitura de hoje',
+    empty: 'Comece um plano de leitura e acompanharemos você todos os dias.', choose: 'Escolher um plano',
+    joinTitle: 'Você foi convidado para um plano de leitura', join: 'Entrar no plano', joined: 'Você já está neste plano.', open: 'Abrir o plano',
+    invalid: 'Este link de plano é inválido ou está incompleto.', startedAgo: 'Este plano começou em {date}. Você pode se pôr em dia no seu ritmo.',
+    presets: {
+      bible365: { name: 'A Bíblia em um ano', desc: 'Toda a Escritura, de Gênesis a Apocalipse.' },
+      nt90: { name: 'Novo Testamento em 90 dias', desc: 'Cerca de três capítulos por dia.' },
+      gospels30: { name: 'Os Evangelhos em 30 dias', desc: 'A vida de Jesus em Mateus, Marcos, Lucas e João.' },
+      psprov31: { name: 'Salmos e Provérbios em um mês', desc: 'Cinco salmos e um provérbio por dia.' },
+      ot270: { name: 'Antigo Testamento em 9 meses', desc: 'De Gênesis a Malaquias, cerca de três capítulos por dia.' },
+    },
   },
   colors: { gold: 'Ouro', mint: 'Menta', sky: 'Céu', lilac: 'Lilás', rose: 'Rosa' },
   picker: {

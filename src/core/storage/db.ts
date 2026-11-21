@@ -60,4 +60,6 @@ export interface Backup {
   highlights: Highlight[]
   notes: Note[]
   bookmarks: Bookmark[]
+  /** Planes de lectura (desde v0.2; opcional) */
+  plans?: unknown[]
 }
