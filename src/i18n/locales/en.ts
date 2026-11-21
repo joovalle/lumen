@@ -59,6 +59,11 @@ export default {
       ot270: { name: 'Old Testament in 9 months', desc: 'Genesis to Malachi, about three chapters a day.' },
     },
   },
+  devotional: {
+    title: 'Daily Light', morning: 'Morning', evening: 'Evening', read: 'Read the devotional', count: '{n} passages',
+    prevDay: 'Previous day', nextDay: 'Next day', shareImage: 'Create image', copyAll: 'Copy devotional',
+    credit: 'Passages selected from “Daily Light on the Daily Path” (Bagster family, 1875), a public-domain work. Every reference was verified; the Bible text is from your version ({version}).',
+  },
   colors: { gold: 'Gold', mint: 'Mint', sky: 'Sky', lilac: 'Lilac', rose: 'Rose' },
   picker: {
     title: 'Go to…', filter: 'Type a book or a reference (e.g. John 3:16)', ot: 'Old Testament',

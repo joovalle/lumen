@@ -57,6 +57,11 @@ export default {
       ot270: { name: 'Antiguo Testamento en 9 meses', desc: 'De Génesis a Malaquías, unos tres capítulos al día.' },
     },
   },
+  devotional: {
+    title: 'Luz diaria', morning: 'Mañana', evening: 'Noche', read: 'Leer el devocional', count: '{n} pasajes',
+    prevDay: 'Día anterior', nextDay: 'Día siguiente', shareImage: 'Crear imagen', copyAll: 'Copiar devocional',
+    credit: 'Selección de pasajes de «Daily Light on the Daily Path» (familia Bagster, 1875), obra de dominio público. Las referencias se verificaron una por una; el texto bíblico es el de tu versión ({version}).',
+  },
   colors: { gold: 'Oro', mint: 'Menta', sky: 'Cielo', lilac: 'Lila', rose: 'Rosa' },
   picker: {
     title: 'Ir a…', filter: 'Escribe un libro o una referencia (p. ej. Jn 3:16)', ot: 'Antiguo Testamento',

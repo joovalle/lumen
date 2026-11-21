@@ -10,7 +10,8 @@
     "test": "vitest run",
     "typecheck": "vue-tsc -b",
     "build:modules": "node scripts/build-modules.mjs",
-    "build:icons": "node scripts/build-icons.mjs"
+    "build:icons": "node scripts/build-icons.mjs",
+    "build:devotional": "node scripts/build-devotional.mjs"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.3.0",

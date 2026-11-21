@@ -14,6 +14,7 @@ import { passageUrl } from '@/composables/links'
 import { useSettings } from '@/stores/settings'
 import { usePlans } from '@/stores/plans'
 import PlanTodayCard from '@/components/plans/PlanTodayCard.vue'
+import DevotionalCard from '@/components/plans/DevotionalCard.vue'
 
 const router = useRouter()
 const settings = useSettings()
@@ -87,6 +88,10 @@ const recent = computed(() => settings.prefs.history.slice(1, 7))
         <button class="btn" @click="read(votd.book, votd.chapter, votd.verse)"><BookOpen /> {{ $t('today.readChapter') }}</button>
         <button class="btn btn-ghost" :disabled="!verse" @click="copy"><Copy /> {{ $t('common.copy') }}</button>
       </div>
+    </section>
+
+    <section class="section">
+      <DevotionalCard />
     </section>
 
     <section class="section">

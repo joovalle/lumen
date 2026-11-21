@@ -9,6 +9,7 @@ export const router = createRouter({
     { path: '/', redirect: '/today' },
     { path: '/today', name: 'today', component: () => import('@/views/TodayView.vue') },
     { path: '/read/:book?/:chapter?', name: 'read', component: ReadView },
+    { path: '/devotional', name: 'devotional', component: () => import('@/views/DevotionalView.vue') },
     { path: '/plans', name: 'plans', component: () => import('@/views/PlansView.vue') },
     { path: '/plans/join', name: 'plan-join', component: () => import('@/views/PlanJoinView.vue') },
     { path: '/plans/:id', name: 'plan', component: () => import('@/views/PlanDetailView.vue') },
