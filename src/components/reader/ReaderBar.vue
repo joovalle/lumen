@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { Check, ChevronDown, ChevronLeft, ChevronRight, Columns2, Minus, PanelRight, Plus, Search, Type } from 'lucide-vue-next'
+import { computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { Check, ChevronDown, ChevronLeft, ChevronRight, Columns2, Download, LoaderCircle, Minus, PanelRight, Plus, Search, Type } from 'lucide-vue-next'
+import { toast } from '@/composables/toast'
+import type { CatalogEntry } from '@/stores/library'
 import PopMenu from '@/components/common/PopMenu.vue'
 import { useLocale } from '@/composables/locale'
 import { nextChapter, prevChapter } from '@/core/reference'
@@ -18,6 +21,25 @@ const prefs = computed(() => settings.prefs)
 const prev = computed(() => prevChapter(reader.passage))
 const next = computed(() => nextChapter(reader.passage))
 const MAX_PARALLEL = 4
+const { t } = useI18n()
+
+onMounted(() => void library.fetchCatalog())
+/** Versiones del catálogo gratuito que aún no están instaladas. */
+const downloadable = computed(() => (library.catalog ?? []).filter((c) => c.kind === 'bible' && !library.get(c.id)))
+
+async function installVersion(c: CatalogEntry) {
+  try {
+    await library.install(c)
+    // Recién descargada: se suma a la vista paralela (y la activa si solo había una versión)
+    if (!prefs.value.bibles.includes(c.id) && prefs.value.bibles.length < MAX_PARALLEL) {
+      prefs.value.bibles = [...prefs.value.bibles, c.id]
+    }
+    prefs.value.parallel = true
+    toast(t('reader.downloaded', { name: c.title }), 'success')
+  } catch (e) {
+    toast((e as Error).message, 'error')
+  }
+}
 
 const activeLabel = computed(() => {
   const ids = prefs.value.parallel ? prefs.value.bibles : prefs.value.bibles.slice(0, 1)
@@ -76,6 +98,12 @@ const size = (d: number) => (prefs.value.fontSize = Math.min(30, Math.max(14, pr
           </button>
         </template>
         <template #default="{ close }">
+          <label class="menu-toggle">
+            <Columns2 class="mt-icon" />
+            <span class="mt-text">{{ $t('reader.parallel') }}<small>{{ $t('reader.parallelHint') }}</small></span>
+            <input type="checkbox" class="switch" :checked="prefs.parallel" @change="toggleParallel">
+          </label>
+          <p v-if="prefs.parallel && library.bibles.length < 2" class="menu-note">{{ $t('reader.needSecond') }}</p>
           <p class="menu-label">{{ prefs.parallel ? $t('reader.addVersion') : $t('reader.version') }}</p>
           <button
             v-for="b in library.bibles" :key="b.id" class="menu-item"
@@ -86,6 +114,18 @@ const size = (d: number) => (prefs.value.fontSize = Math.min(30, Math.max(14, pr
             <span class="title">{{ b.info.title }}</span>
             <Check class="tick" />
           </button>
+          <template v-if="downloadable.length">
+            <p class="menu-label">{{ $t('reader.moreVersions') }}</p>
+            <button
+              v-for="c in downloadable" :key="c.id" class="menu-item dl" :disabled="c.id in library.progress"
+              @click="installVersion(c)"
+            >
+              <span class="abbr">{{ c.abbreviation }}</span>
+              <span class="title">{{ c.title }} <small>· {{ $t(`lang.${c.language}`) }}</small></span>
+              <LoaderCircle v-if="c.id in library.progress" class="spin dl-icon" />
+              <Download v-else class="dl-icon" />
+            </button>
+          </template>
           <RouterLink to="/library" class="menu-foot" @click="close()"><Plus /> {{ $t('nav.library') }}</RouterLink>
         </template>
       </PopMenu>
@@ -164,6 +204,17 @@ const size = (d: number) => (prefs.value.fontSize = Math.min(30, Math.max(14, pr
 .version:hover, .version.open { border-color: var(--border-strong); color: var(--text); }
 
 .menu-label { padding: 6px 10px 8px; font-size: 12px; font-weight: 600; color: var(--text-3); }
+.menu-toggle {
+  display: flex; align-items: center; gap: 10px; padding: 10px; margin-bottom: 6px;
+  border-radius: 12px; background: var(--surface); cursor: pointer;
+}
+.mt-icon { width: 20px; height: 20px; color: var(--accent); flex: none; }
+.mt-text { flex: 1; display: grid; font-size: 14px; font-weight: 600; }
+.mt-text small { font-size: 11.5px; font-weight: 500; color: var(--text-3); }
+.menu-note { padding: 2px 10px 8px; font-size: 12.5px; color: var(--accent); font-weight: 600; }
+.menu-item.dl .title small { color: var(--text-3); font-size: 12px; }
+.menu-item.dl:disabled { opacity: 0.6; cursor: progress; }
+.dl-icon { width: 16px; height: 16px; color: var(--text-3); }
 .menu-item {
   display: grid; grid-template-columns: 64px 1fr 18px; align-items: center; gap: 8px;
   width: 100%; padding: 10px; border: 0; border-radius: 10px; background: transparent; text-align: left;

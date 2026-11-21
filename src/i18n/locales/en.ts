@@ -10,6 +10,7 @@ export default {
   },
   lang: { es: 'Español', en: 'English', pt: 'Português', mul: 'Multilingual' },
   reader: {
+    parallelHint: 'Versions side by side, aligned by verse', needSecond: 'Download another version below to compare.', moreVersions: 'Download more versions', downloaded: '“{name}” ready to compare',
     choosePassage: 'Choose passage', prevChapter: 'Previous chapter', nextChapter: 'Next chapter',
     version: 'Version', addVersion: 'Add parallel version', removeVersion: 'Remove version',
     parallel: 'Parallel view', study: 'Study panel', textSettings: 'Text', chapter: 'Chapter',

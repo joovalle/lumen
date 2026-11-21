@@ -24,7 +24,7 @@ const lookup = computed(() => props.columns.map((c) => new Map(c.rows.map((r, i)
 </script>
 
 <template>
-  <article class="parallel" :class="{ 'no-strong': !settings.prefs.strongs }" :style="{ '--cols': columns.length }">
+  <article class="parallel" :class="{ 'no-strong': !settings.prefs.strongs, two: columns.length === 2 }" :style="{ '--cols': columns.length }">
     <header class="head">
       <h1>{{ bookName(reader.passage.book) }} <span class="num">{{ reader.passage.chapter }}</span></h1>
     </header>
@@ -91,5 +91,17 @@ const lookup = computed(() => props.columns.map((c) => new Map(c.rows.map((r, i)
   .vnum { grid-auto-flow: column; justify-content: start; align-items: center; padding: 0; font-size: 13px; }
   .cell { display: grid; grid-template-columns: 4.2rem 1fr; gap: 10px; }
   .cell-label { display: block; font-family: var(--font-ui); font-size: 11px; font-weight: 700; color: var(--text-3); letter-spacing: 0.05em; padding-top: 0.45em; }
+
+  /* Dos versiones en el celular: columnas lado a lado, alineadas por versículo */
+  .two .grid { font-size: calc(var(--read-size) * 0.8); line-height: 1.55; }
+  .two .labels {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 14px;
+    top: calc(var(--bar-h) + env(safe-area-inset-top)); padding: 8px 6px; margin: 0;
+  }
+  .two .labels .gutter { display: none; }
+  .two .row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 14px; padding: 10px 6px; }
+  .two .vnum { grid-column: 1 / -1; font-size: 11px; }
+  .two .cell { display: block; }
+  .two .cell-label { display: none; }
 }
 </style>

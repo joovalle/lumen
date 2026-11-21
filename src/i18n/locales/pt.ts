@@ -10,6 +10,7 @@ export default {
   },
   lang: { es: 'Español', en: 'English', pt: 'Português', mul: 'Vários idiomas' },
   reader: {
+    parallelHint: 'Versões lado a lado, alinhadas por versículo', needSecond: 'Baixe outra versão abaixo para comparar.', moreVersions: 'Baixar mais versões', downloaded: '“{name}” pronta para comparar',
     choosePassage: 'Escolher passagem', prevChapter: 'Capítulo anterior', nextChapter: 'Próximo capítulo',
     version: 'Versão', addVersion: 'Adicionar versão em paralelo', removeVersion: 'Remover versão',
     parallel: 'Visão paralela', study: 'Painel de estudo', textSettings: 'Texto', chapter: 'Capítulo',
