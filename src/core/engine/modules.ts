@@ -221,6 +221,18 @@ const COL = {
 }
 const pick = (m: Map<string, string>, names: string[]) => names.map((n) => m.get(n)).find(Boolean)
 
+/**
+ * Final de un rango de capítulos/versículos en SQL. Muchos módulos guardan 0
+ * (o nada) cuando la nota es de un solo versículo: entonces el final = el inicio.
+ */
+function endChapter(cb: string, ce?: string): string {
+  return ce ? `(CASE WHEN ${q(ce)} IS NULL OR ${q(ce)} < ${q(cb)} THEN ${q(cb)} ELSE ${q(ce)} END)` : q(cb)
+}
+function endVerse(cb: string, vb: string, ce?: string, ve?: string): string {
+  if (!ve) return q(vb)
+  return `(CASE WHEN ${q(ve)} IS NULL OR ${q(ve)} <= 0 OR (${endChapter(cb, ce)} = ${q(cb)} AND ${q(ve)} < ${q(vb)}) THEN ${q(vb)} ELSE ${q(ve)} END)`
+}
+
 /** "VerseCommentary(Book, Chapter, …), Details(…)" — para mensajes de error útiles. */
 export function describeSchema(db: Database, tables: Map<string, string>): string {
   return [...tables.values()]
@@ -275,7 +287,7 @@ export class CommentaryModule extends Module {
     }
     if (this.chapterT) {
       const c = this.chapterT
-      const ce = c.ce ? `COALESCE(${q(c.ce)}, ${q(c.cb)})` : q(c.cb)
+      const ce = endChapter(c.cb, c.ce)
       for (const r of rows<{ cb: number; ce: number; t: string }>(
         this.db,
         `SELECT ${q(c.cb)} AS cb, ${ce} AS ce, ${q(c.text)} AS t FROM ${q(c.t)} WHERE ${q(c.b)}=? AND ${q(c.cb)} <= ? AND ${ce} >= ?`,
@@ -284,8 +296,8 @@ export class CommentaryModule extends Module {
     }
     if (this.verse) {
       const v = this.verse
-      const ce = v.ce ? `COALESCE(${q(v.ce)}, ${q(v.cb)})` : q(v.cb)
-      const ve = v.ve ? `COALESCE(${q(v.ve)}, ${q(v.vb)})` : q(v.vb)
+      const ce = endChapter(v.cb, v.ce)
+      const ve = endVerse(v.cb, v.vb, v.ce, v.ve)
       for (const r of rows<{ cb: number; vb: number; ce: number; ve: number; t: string }>(
         this.db,
         `SELECT ${q(v.cb)} AS cb, ${q(v.vb)} AS vb, ${ce} AS ce, ${ve} AS ve, ${q(v.text)} AS t FROM ${q(v.t)}
@@ -304,8 +316,8 @@ export class CommentaryModule extends Module {
     const pos = chapter * 1000 + verse
     if (this.verse) {
       const v = this.verse
-      const ce = v.ce ? `COALESCE(${q(v.ce)}, ${q(v.cb)})` : q(v.cb)
-      const ve = v.ve ? `COALESCE(${q(v.ve)}, ${q(v.vb)})` : q(v.vb)
+      const ce = endChapter(v.cb, v.ce)
+      const ve = endVerse(v.cb, v.vb, v.ce, v.ve)
       for (const r of rows<{ cb: number; vb: number; ce: number; ve: number; t: string }>(
         this.db,
         `SELECT ${q(v.cb)} AS cb, ${q(v.vb)} AS vb, ${ce} AS ce, ${ve} AS ve, ${q(v.text)} AS t FROM ${q(v.t)}
@@ -319,7 +331,7 @@ export class CommentaryModule extends Module {
     }
     if (this.chapterT) {
       const c = this.chapterT
-      const ce = c.ce ? `COALESCE(${q(c.ce)}, ${q(c.cb)})` : q(c.cb)
+      const ce = endChapter(c.cb, c.ce)
       for (const r of rows<{ cb: number; ce: number; t: string }>(
         this.db,
         `SELECT ${q(c.cb)} AS cb, ${ce} AS ce, ${q(c.text)} AS t FROM ${q(c.t)} WHERE ${q(c.b)}=? AND ${q(c.cb)} <= ? AND ${ce} >= ?`,

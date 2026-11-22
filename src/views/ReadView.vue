@@ -108,10 +108,15 @@ useEventListener(window, 'scroll', () => {
   ticking = true
   requestAnimationFrame(() => {
     ticking = false
-    const top = (document.querySelector('header.bar')?.getBoundingClientRect().bottom ?? 60) + 24
+    // Línea de lectura: a un tercio del área donde se ve el texto (en el celular,
+    // el panel ocupa la mitad inferior de la pantalla)
+    const top = document.querySelector('header.bar')?.getBoundingClientRect().bottom ?? 60
+    const sheet = document.querySelector('aside.study')?.getBoundingClientRect()
+    const bottom = sheet && sheet.top > top + 80 && sheet.left < 10 ? sheet.top : window.innerHeight
+    const line = top + (bottom - top) * 0.33
     const verses = content.value?.querySelectorAll<HTMLElement>('[data-v], .row.verse[id]') ?? []
     for (const el of verses) {
-      if (el.getBoundingClientRect().bottom > top) {
+      if (el.getBoundingClientRect().bottom > line) {
         const v = Number(el.dataset.v ?? el.id.replace('v', ''))
         if (v && v !== reader.visibleVerse) {
           reader.visibleVerse = v

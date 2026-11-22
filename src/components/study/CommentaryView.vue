@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, shallowRef, watch } from 'vue'
+import { useEventListener } from '@vueuse/core'
+import { activeNote } from '@/core/commentary'
 import { LoaderCircle, ScrollText } from 'lucide-vue-next'
 import { engine } from '@/core/engine/client'
 import type { CommentaryEntry } from '@/core/engine/modules'
@@ -45,23 +47,28 @@ const notes = computed(() => entries.value.filter((e) => e.scope === 'verse'))
 
 /** Versículo de referencia: el que tocaste o, si no, el primero visible al leer. */
 const current = computed(() => reader.focus ?? reader.visibleVerse ?? 1)
-const active = computed(() => {
-  let found = -1
-  notes.value.forEach((e, i) => {
-    if ((e.from ?? 0) <= current.value && current.value <= (e.to ?? 0)) found = i
-  })
-  return found
-})
+watch(() => reader.focus, (f) => { if (f) pausedUntil = 0 })
+const active = computed(() => activeNote(notes.value, current.value))
+
+/** Si la persona desplaza el comentario con el dedo, no se la interrumpe por unos segundos. */
+let pausedUntil = 0
+let ours = false
+const box = () => list.value?.closest<HTMLElement>('.body') ?? null
+useEventListener(() => box(), 'scroll', () => {
+  if (!ours) pausedUntil = Date.now() + 4000
+}, { passive: true })
 
 watch(active, async (i) => {
-  if (i < 0) return
+  if (i < 0 || Date.now() < pausedUntil) return
   await nextTick()
   // Se desplaza solo el panel (scrollIntoView movería también la página y la lectura)
   const el = list.value?.querySelector<HTMLElement>(`[data-i="${i}"]`)
-  const box = el?.closest<HTMLElement>('.body')
-  if (el && box) {
-    const top = el.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop - 8
-    box.scrollTo({ top, behavior: 'smooth' })
+  const container = el?.closest<HTMLElement>('.body')
+  if (el && container) {
+    const top = el.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop - 8
+    ours = true
+    container.scrollTo({ top, behavior: 'smooth' })
+    setTimeout(() => (ours = false), 1200)
   }
 })
 
