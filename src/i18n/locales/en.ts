@@ -76,6 +76,7 @@ export default {
     pauline: 'Pauline Letters', general: 'General Letters', apocalyptic: 'Prophecy',
   },
   study: {
+    followHint: 'The commentary follows your reading: scroll the chapter or tap a verse.', goToVerse: 'Go to verse',
     refs: 'References', compare: 'Compare', notes: 'Notes', commentary: 'Commentaries', dictionary: 'Dictionary',
     pickVerse: 'Tap a verse to study it here.', noRefs: 'No cross references for this verse.',
     needXrefs: 'Install the free cross references to see related passages.', install: 'Install',
@@ -100,10 +101,11 @@ export default {
     loadMore: 'Load more', indexing: 'Preparing the search index…', in: 'in',
   },
   library: {
+    importOld: 'This is an old-format e-Sword module ({ext}). Open it once in e-Sword 9 or later (it converts it to {newExt}) and import the new file.', importUnknown: 'Lumen does not recognize {ext} files. Use e-Sword .bblx, .cmtx or .dctx modules.',
     title: 'Library', subtitle: 'Your versions and study resources, stored on this device.',
     installed: 'On this device', catalog: 'Free catalog', catalogError: 'The catalog could not be loaded. Check your connection.',
     importTitle: 'Import from e-Sword', importText: 'Drop your modules here or choose them from your computer. They are read on your device; nothing is uploaded.',
-    importButton: 'Choose files', importFormats: 'Formats: Bibles .bblx, commentaries .cmtx and dictionaries .dctx (e-Sword 9 or later).',
+    importButton: 'Choose files', importFormats: 'Formats: Bibles .bblx, commentaries .cmtx or .cmti and dictionaries .dctx (e-Sword 9 or later).',
     importLegal: 'Only import modules you have the right to use. Lumen does not distribute copyrighted content.',
     importOk: '“{name}” was added to your library', importFail: 'Could not import “{name}”: {error}',
     remove: 'Remove', removeConfirm: 'Remove “{name}” from this device?', removed: 'Module removed',

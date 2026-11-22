@@ -74,6 +74,7 @@ export default {
     pauline: 'Cartas de Pablo', general: 'Cartas generales', apocalyptic: 'Profecía',
   },
   study: {
+    followHint: 'El comentario sigue tu lectura: desplázate por el capítulo o toca un versículo.', goToVerse: 'Ir al versículo',
     refs: 'Referencias', compare: 'Comparar', notes: 'Notas', commentary: 'Comentarios', dictionary: 'Diccionario',
     pickVerse: 'Toca un versículo para estudiarlo aquí.', noRefs: 'No hay referencias cruzadas para este versículo.',
     needXrefs: 'Instala las referencias cruzadas gratuitas para ver pasajes relacionados.', install: 'Instalar',
@@ -98,10 +99,11 @@ export default {
     loadMore: 'Cargar más', indexing: 'Preparando el índice de búsqueda…', in: 'en',
   },
   library: {
+    importOld: 'Es un módulo del formato antiguo de e-Sword ({ext}). Ábrelo una vez en e-Sword 9 o superior (lo convierte solo a {newExt}) e importa el archivo nuevo.', importUnknown: 'Lumen no reconoce los archivos {ext}. Usa módulos de e-Sword .bblx, .cmtx o .dctx.',
     title: 'Biblioteca', subtitle: 'Tus versiones y recursos de estudio, guardados en este dispositivo.',
     installed: 'En tu dispositivo', catalog: 'Catálogo gratuito', catalogError: 'No se pudo cargar el catálogo. Revisa tu conexión.',
     importTitle: 'Importar desde e-Sword', importText: 'Arrastra aquí tus módulos o elígelos desde tu equipo. Se leen en tu dispositivo; nada se sube a internet.',
-    importButton: 'Elegir archivos', importFormats: 'Formatos: Biblias .bblx, comentarios .cmtx y diccionarios .dctx (e-Sword 9 o superior).',
+    importButton: 'Elegir archivos', importFormats: 'Formatos: Biblias .bblx, comentarios .cmtx o .cmti y diccionarios .dctx (e-Sword 9 o superior).',
     importLegal: 'Importa solo módulos que tengas derecho a usar. Lumen no distribuye contenido con derechos de autor.',
     importOk: '«{name}» se añadió a tu biblioteca', importFail: 'No se pudo importar «{name}»: {error}',
     remove: 'Eliminar', removeConfirm: '¿Eliminar «{name}» de este dispositivo?', removed: 'Módulo eliminado',

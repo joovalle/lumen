@@ -60,6 +60,7 @@ const api = {
   search: (id: string, query: string, opts?: SearchOptions) => get(id, BibleModule).search(query, opts),
   commentary: (id: string, book: number, chapter: number, verse: number) =>
     get(id, CommentaryModule).lookup(book, chapter, verse),
+  commentaryChapter: (id: string, book: number, chapter: number) => get(id, CommentaryModule).forChapter(book, chapter),
   topics: (id: string, prefix: string, limit?: number) => get(id, DictionaryModule).topics(prefix, limit),
   definition: (id: string, topic: string) => get(id, DictionaryModule).definition(topic),
   crossRefs: (id: string, key: number) => get(id, CrossRefModule).refs(key),

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { onKeyStroke, useSwipe } from '@vueuse/core'
+import { onKeyStroke, useEventListener, useSwipe } from '@vueuse/core'
 import { BookOpen, LoaderCircle } from 'lucide-vue-next'
 import ReaderBar from '@/components/reader/ReaderBar.vue'
 import ChapterText from '@/components/reader/ChapterText.vue'
@@ -100,6 +100,28 @@ onKeyStroke('g', (e) => {
   e.preventDefault()
   reader.pickerOpen = true
 })
+
+// Versículo visible al leer: el comentario lo sigue (solo con el panel de comentarios abierto)
+let ticking = false
+useEventListener(window, 'scroll', () => {
+  if (ticking || !settings.prefs.studyOpen || settings.prefs.studyTab !== 'commentary') return
+  ticking = true
+  requestAnimationFrame(() => {
+    ticking = false
+    const top = (document.querySelector('header.bar')?.getBoundingClientRect().bottom ?? 60) + 24
+    const verses = content.value?.querySelectorAll<HTMLElement>('[data-v], .row.verse[id]') ?? []
+    for (const el of verses) {
+      if (el.getBoundingClientRect().bottom > top) {
+        const v = Number(el.dataset.v ?? el.id.replace('v', ''))
+        if (v && v !== reader.visibleVerse) {
+          reader.visibleVerse = v
+          if (!reader.selection.length) reader.focus = null
+        }
+        break
+      }
+    }
+  })
+}, { passive: true })
 
 // Deslizar para cambiar de capítulo (pantallas táctiles)
 const { direction, lengthX, lengthY } = useSwipe(content, {

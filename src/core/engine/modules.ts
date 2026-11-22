@@ -27,7 +27,14 @@ export interface VerseRow { verse: number; html: string }
 export interface SearchHit { key: number; html: string }
 export interface SearchResult { total: number; hits: SearchHit[]; perBook: Record<number, number> }
 export interface SearchOptions { from?: number; to?: number; limit?: number; offset?: number }
-export interface CommentaryEntry { scope: 'verse' | 'chapter' | 'book'; range: string; html: string }
+export interface CommentaryEntry {
+  scope: 'verse' | 'chapter' | 'book'
+  range: string
+  html: string
+  /** Versículos del capítulo actual que cubre la nota (solo en forChapter) */
+  from?: number
+  to?: number
+}
 export interface CrossRef { start: number; end: number | null; votes: number }
 
 export class UnsupportedModuleError extends Error {}
@@ -203,30 +210,93 @@ const escapeHtml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;')
 const highlightSnippet = (s: string) =>
   escapeHtml(s).replace(/\u0001/g, '<mark>').replace(/\u0002/g, '</mark>')
 
+/** Nombres de columna conocidos (en minúsculas), en orden de preferencia. */
+const COL = {
+  book: ['book', 'booknumber', 'book_number'],
+  chapterBegin: ['chapterbegin', 'chapter', 'chapterstart', 'fromchapter', 'chapter_begin', 'chapter_from'],
+  chapterEnd: ['chapterend', 'tochapter', 'chapter_end', 'chapter_to'],
+  verseBegin: ['versebegin', 'verse', 'versestart', 'fromverse', 'verse_begin', 'verse_from'],
+  verseEnd: ['verseend', 'toverse', 'verse_end', 'verse_to'],
+  text: ['comments', 'comment', 'text', 'content', 'data', 'commentary'],
+}
+const pick = (m: Map<string, string>, names: string[]) => names.map((n) => m.get(n)).find(Boolean)
+
+/** "VerseCommentary(Book, Chapter, …), Details(…)" — para mensajes de error útiles. */
+export function describeSchema(db: Database, tables: Map<string, string>): string {
+  return [...tables.values()]
+    .filter((t) => !t.startsWith('sqlite_'))
+    .map((t) => `${t}(${[...columnMap(db, t).values()].join(', ')})`)
+    .join('; ')
+}
+
 export class CommentaryModule extends Module {
   private verse?: { t: string; b: string; cb: string; vb: string; ce?: string; ve?: string; text: string }
   private chapterT?: { t: string; b: string; cb: string; ce?: string; text: string }
   private bookT?: { t: string; b: string; text: string }
 
+  /**
+   * Las versiones de e-Sword (.cmtx, .cmti…) y otros programas nombran las
+   * columnas de forma distinta; se aceptan los alias conocidos y, si una tabla
+   * no se entiende, se usan las demás en vez de rechazar el módulo.
+   */
   constructor(db: Database, info: ModuleInfo, tables: Map<string, string>) {
     super(db, info)
-    const vt = tables.get('versecommentary')
+    const vt = tables.get('versecommentary') ?? tables.get('commentary') ?? tables.get('versecomments')
     if (vt) {
       const m = columnMap(db, vt)
-      const [b, cb, vb, text] = need(m, 'Book', 'ChapterBegin', 'VerseBegin', 'Comments')
-      this.verse = { t: vt, b, cb, vb, ce: m.get('chapterend'), ve: m.get('verseend'), text }
+      const b = pick(m, COL.book), cb = pick(m, COL.chapterBegin), vb = pick(m, COL.verseBegin), text = pick(m, COL.text)
+      if (b && cb && vb && text) this.verse = { t: vt, b, cb, vb, ce: pick(m, COL.chapterEnd), ve: pick(m, COL.verseEnd), text }
     }
     const ct = tables.get('chaptercommentary')
     if (ct) {
       const m = columnMap(db, ct)
-      const [b, cb, text] = need(m, 'Book', 'ChapterBegin', 'Comments')
-      this.chapterT = { t: ct, b, cb, ce: m.get('chapterend'), text }
+      const b = pick(m, COL.book), cb = pick(m, COL.chapterBegin), text = pick(m, COL.text)
+      if (b && cb && text) this.chapterT = { t: ct, b, cb, ce: pick(m, COL.chapterEnd), text }
     }
     const bt = tables.get('bookcommentary')
     if (bt) {
-      const [b, text] = need(columnMap(db, bt), 'Book', 'Comments')
-      this.bookT = { t: bt, b, text }
+      const m = columnMap(db, bt)
+      const b = pick(m, COL.book), text = pick(m, COL.text)
+      if (b && text) this.bookT = { t: bt, b, text }
     }
+    if (!this.verse && !this.chapterT && !this.bookT) {
+      throw new UnsupportedModuleError(`Estructura de comentario no reconocida: ${describeSchema(db, tables)}`)
+    }
+  }
+
+  /** Todo el comentario de un capítulo, en orden: libro, capítulo y notas por versículo. */
+  forChapter(book: number, chapter: number): CommentaryEntry[] {
+    const out: CommentaryEntry[] = []
+    if (this.bookT) {
+      const b = this.bookT
+      for (const r of rows<{ t: string }>(this.db, `SELECT ${q(b.text)} AS t FROM ${q(b.t)} WHERE ${q(b.b)}=?`, [book])) {
+        out.push({ scope: 'book', range: '', html: toSafeHtml(r.t), from: 0, to: 0 })
+      }
+    }
+    if (this.chapterT) {
+      const c = this.chapterT
+      const ce = c.ce ? `COALESCE(${q(c.ce)}, ${q(c.cb)})` : q(c.cb)
+      for (const r of rows<{ cb: number; ce: number; t: string }>(
+        this.db,
+        `SELECT ${q(c.cb)} AS cb, ${ce} AS ce, ${q(c.text)} AS t FROM ${q(c.t)} WHERE ${q(c.b)}=? AND ${q(c.cb)} <= ? AND ${ce} >= ?`,
+        [book, chapter, chapter],
+      )) out.push({ scope: 'chapter', range: r.cb === r.ce ? `${r.cb}` : `${r.cb}–${r.ce}`, html: toSafeHtml(r.t), from: 0, to: 0 })
+    }
+    if (this.verse) {
+      const v = this.verse
+      const ce = v.ce ? `COALESCE(${q(v.ce)}, ${q(v.cb)})` : q(v.cb)
+      const ve = v.ve ? `COALESCE(${q(v.ve)}, ${q(v.vb)})` : q(v.vb)
+      for (const r of rows<{ cb: number; vb: number; ce: number; ve: number; t: string }>(
+        this.db,
+        `SELECT ${q(v.cb)} AS cb, ${q(v.vb)} AS vb, ${ce} AS ce, ${ve} AS ve, ${q(v.text)} AS t FROM ${q(v.t)}
+         WHERE ${q(v.b)}=? AND ${q(v.cb)} <= ? AND ${ce} >= ? ORDER BY ${q(v.cb)}, ${q(v.vb)}`,
+        [book, chapter, chapter],
+      )) {
+        const range = r.cb === r.ce ? (r.vb === r.ve ? `${r.cb}:${r.vb}` : `${r.cb}:${r.vb}–${r.ve}`) : `${r.cb}:${r.vb}–${r.ce}:${r.ve}`
+        out.push({ scope: 'verse', range, html: toSafeHtml(r.t), from: r.cb < chapter ? 1 : r.vb, to: r.ce > chapter ? 999 : r.ve })
+      }
+    }
+    return out
   }
 
   lookup(book: number, chapter: number, verse: number): CommentaryEntry[] {
@@ -308,7 +378,7 @@ export function openModule(db: Database, id: string, name: string): Module {
   const info: ModuleInfo = { id, kind: 'bible', title: d.title, abbreviation: d.abbreviation, description: d.description, rtl: d.rtl, strong: d.strong }
   const bible = tables.get('bible')
   if (bible) return new BibleModule(db, info, bible)
-  if (tables.has('versecommentary') || tables.has('chaptercommentary') || tables.has('bookcommentary')) {
+  if (['versecommentary', 'chaptercommentary', 'bookcommentary', 'versecomments'].some((t) => tables.has(t))) {
     info.kind = 'commentary'
     return new CommentaryModule(db, info, tables)
   }

@@ -24,9 +24,11 @@ const tabs: { id: StudyTab; icon: unknown; label: string }[] = [
 ]
 const tab = computed(() => settings.prefs.studyTab)
 const focusLabel = computed(() =>
-  reader.focus ? passage({ book: reader.passage.book, chapter: reader.passage.chapter, verse: reader.focus }) : '',
+  reader.focus
+    ? passage({ book: reader.passage.book, chapter: reader.passage.chapter, verse: reader.focus })
+    : tab.value === 'commentary' ? passage({ book: reader.passage.book, chapter: reader.passage.chapter }) : '',
 )
-const needsVerse = computed(() => tab.value !== 'dictionary' && !reader.focus)
+const needsVerse = computed(() => tab.value !== 'dictionary' && tab.value !== 'commentary' && !reader.focus)
 </script>
 
 <template>
@@ -91,7 +93,7 @@ const needsVerse = computed(() => tab.value !== 'dictionary' && !reader.focus)
 
 @media (max-width: 720px) {
   .study {
-    left: 0; width: 100%; height: 72dvh;
+    left: 0; width: 100%; height: 52dvh;
     bottom: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom));
     border-left: 0; border-top: 1px solid var(--border);
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;

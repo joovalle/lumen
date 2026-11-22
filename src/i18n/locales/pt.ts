@@ -76,6 +76,7 @@ export default {
     pauline: 'Cartas de Paulo', general: 'Cartas gerais', apocalyptic: 'Profecia',
   },
   study: {
+    followHint: 'O comentário acompanha sua leitura: role o capítulo ou toque em um versículo.', goToVerse: 'Ir para o versículo',
     refs: 'Referências', compare: 'Comparar', notes: 'Notas', commentary: 'Comentários', dictionary: 'Dicionário',
     pickVerse: 'Toque em um versículo para estudá-lo aqui.', noRefs: 'Não há referências cruzadas para este versículo.',
     needXrefs: 'Instale as referências cruzadas gratuitas para ver passagens relacionadas.', install: 'Instalar',
@@ -100,10 +101,11 @@ export default {
     loadMore: 'Carregar mais', indexing: 'Preparando o índice de busca…', in: 'em',
   },
   library: {
+    importOld: 'É um módulo no formato antigo do e-Sword ({ext}). Abra-o uma vez no e-Sword 9 ou superior (ele converte para {newExt}) e importe o arquivo novo.', importUnknown: 'O Lumen não reconhece arquivos {ext}. Use módulos do e-Sword .bblx, .cmtx ou .dctx.',
     title: 'Biblioteca', subtitle: 'Suas versões e recursos de estudo, guardados neste dispositivo.',
     installed: 'Neste dispositivo', catalog: 'Catálogo gratuito', catalogError: 'Não foi possível carregar o catálogo. Verifique sua conexão.',
     importTitle: 'Importar do e-Sword', importText: 'Arraste seus módulos para cá ou escolha-os no seu computador. Eles são lidos no seu dispositivo; nada é enviado.',
-    importButton: 'Escolher arquivos', importFormats: 'Formatos: Bíblias .bblx, comentários .cmtx e dicionários .dctx (e-Sword 9 ou superior).',
+    importButton: 'Escolher arquivos', importFormats: 'Formatos: Bíblias .bblx, comentários .cmtx ou .cmti e dicionários .dctx (e-Sword 9 ou superior).',
     importLegal: 'Importe apenas módulos que você tem o direito de usar. O Lumen não distribui conteúdo protegido por direitos autorais.',
     importOk: '“{name}” foi adicionado à sua biblioteca', importFail: 'Não foi possível importar “{name}”: {error}',
     remove: 'Excluir', removeConfirm: 'Excluir “{name}” deste dispositivo?', removed: 'Módulo excluído',

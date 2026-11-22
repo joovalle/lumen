@@ -8,6 +8,8 @@ export const useReader = defineStore('reader', () => {
   const passage = ref<Passage>({ book: 43, chapter: 1 })
   const selection = ref<number[]>([])
   const focus = ref<number | null>(null)
+  /** Primer versículo visible en pantalla mientras se lee (para el comentario que acompaña) */
+  const visibleVerse = ref<number | null>(null)
   const pickerOpen = ref(false)
   const paletteOpen = ref(false)
   /** Tema del diccionario a consultar (p. ej. un número Strong). */
@@ -21,7 +23,10 @@ export const useReader = defineStore('reader', () => {
   )
 
   function setPassage(p: Passage) {
-    if (p.book !== passage.value.book || p.chapter !== passage.value.chapter) clear()
+    if (p.book !== passage.value.book || p.chapter !== passage.value.chapter) {
+      clear()
+      visibleVerse.value = null
+    }
     passage.value = { book: p.book, chapter: p.chapter }
   }
 
@@ -51,5 +56,5 @@ export const useReader = defineStore('reader', () => {
     settings.prefs.studyOpen = true
   }
 
-  return { passage, selection, focus, focusKey, selectedKeys, pickerOpen, paletteOpen, dictionaryTopic, setPassage, toggle, clear, openStudy }
+  return { passage, selection, focus, visibleVerse, focusKey, selectedKeys, pickerOpen, paletteOpen, dictionaryTopic, setPassage, toggle, clear, openStudy }
 })

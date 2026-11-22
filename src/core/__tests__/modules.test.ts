@@ -70,6 +70,9 @@ describe('comentarios y diccionarios de e-Sword', () => {
     expect(entries.map((e) => e.scope)).toEqual(['verse', 'chapter', 'book'])
     expect(entries[0]).toEqual({ scope: 'verse', range: '3:14–17', html: '<b>El amor</b> de Dios' })
     expect(m.lookup(43, 3, 18).map((e) => e.scope)).toEqual(['chapter', 'book'])
+    const ch = m.forChapter(43, 3)
+    expect(ch.map((e) => [e.scope, e.from, e.to])).toEqual([['book', 0, 0], ['chapter', 0, 0], ['verse', 14, 17]])
+    expect(m.forChapter(43, 4).map((e) => e.scope)).toEqual(['book'])
   })
 
   it('lee un diccionario .dctx (p. ej. léxico Strong)', () => {
@@ -86,5 +89,28 @@ describe('comentarios y diccionarios de e-Sword', () => {
     const db = new SQL.Database()
     db.run('CREATE TABLE Foo (a INT)')
     expect(() => openModule(db, 'u', 'u')).toThrow(UnsupportedModuleError)
+  })
+})
+
+describe('variantes de comentarios (.cmti y otros)', () => {
+  it('acepta columnas «Chapter»/«Verse» en lugar de «ChapterBegin»/«VerseBegin»', async () => {
+    const SQL = await initSqlJs()
+    const db = new SQL.Database()
+    db.run(`CREATE TABLE Details (Title TEXT)`)
+    db.run(`INSERT INTO Details VALUES ('MH completo')`)
+    db.run(`CREATE TABLE BookCommentary (Book INT, Comments TEXT)`)
+    db.run(`CREATE TABLE ChapterCommentary (Book INT, Chapter INT, Comments TEXT)`)
+    db.run(`CREATE TABLE VerseCommentary (Book INT, ChapterBegin INT, ChapterEnd INT, VerseBegin INT, VerseEnd INT, Comments TEXT)`)
+    db.run(`INSERT INTO ChapterCommentary VALUES (43, 3, 'Intro')`)
+    db.run(`INSERT INTO VerseCommentary VALUES (43, 3, 3, 1, 8, '<p>Nota</p>')`)
+    const m = openModule(db, 'c', 'c') as CommentaryModule
+    expect(m.forChapter(43, 3).map((e) => e.scope)).toEqual(['chapter', 'verse'])
+  })
+
+  it('usa las tablas que entiende y explica la estructura cuando no entiende ninguna', async () => {
+    const SQL = await initSqlJs()
+    const db = new SQL.Database()
+    db.run(`CREATE TABLE ChapterCommentary (Libro INT, Cap INT, Texto TEXT)`)
+    expect(() => openModule(db, 'c', 'c')).toThrow(/ChapterCommentary\(Libro, Cap, Texto\)/)
   })
 })

@@ -2,10 +2,10 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { Check, Download, FileUp, HardDrive, LoaderCircle, ShieldCheck, Trash2 } from 'lucide-vue-next'
+import { Check, CircleCheck, Download, FileUp, HardDrive, LoaderCircle, ShieldCheck, Trash2, TriangleAlert } from 'lucide-vue-next'
 import ModuleCard from '@/components/common/ModuleCard.vue'
 import { toast } from '@/composables/toast'
-import { useLibrary, IMPORT_EXTENSIONS, type CatalogEntry } from '@/stores/library'
+import { useLibrary, ImportError, OLD_ESWORD, type CatalogEntry } from '@/stores/library'
 import { useSettings } from '@/stores/settings'
 import type { InstalledModule } from '@/core/storage/db'
 
@@ -17,6 +17,8 @@ const dragging = ref(false)
 const importing = ref(0)
 const usage = ref<string | null>(null)
 const fileInput = ref<HTMLInputElement>()
+/** Resultado de las últimas importaciones (los avisos desaparecen; esto queda a la vista) */
+const results = ref<{ name: string; ok: boolean; message: string }[]>([])
 
 const mb = (bytes: number) => (bytes < 1e5 ? `${Math.max(1, Math.round(bytes / 1e3))} KB` : `${(bytes / 1e6).toFixed(bytes < 1e7 ? 1 : 0)} MB`)
 const available = computed(() => (library.catalog ?? []).filter((c) => !library.get(c.id)))
@@ -44,9 +46,14 @@ async function importFiles(files: FileList | File[] | null | undefined) {
     importing.value++
     try {
       const rec = await library.importFile(file)
+      results.value.unshift({ name: file.name, ok: true, message: t('library.importOk', { name: rec.info.title }) })
       toast(t('library.importOk', { name: rec.info.title }), 'success')
     } catch (e) {
-      toast(t('library.importFail', { name: file.name, error: (e as Error).message }), 'error', 7000)
+      let message = (e as Error).message
+      if (e instanceof ImportError && e.kind === 'old') message = t('library.importOld', { ext: e.message, newExt: OLD_ESWORD[e.message] })
+      else if (e instanceof ImportError) message = t('library.importUnknown', { ext: e.message })
+      results.value.unshift({ name: file.name, ok: false, message })
+      toast(t('library.importFail', { name: file.name, error: message }), 'error', 7000)
     } finally {
       importing.value--
     }
@@ -125,13 +132,20 @@ const meta = (m: InstalledModule) => [
         class="drop" :class="{ dragging }"
         @dragover.prevent="dragging = true" @dragleave.prevent="dragging = false" @drop.prevent="onDrop"
       >
-        <input ref="fileInput" type="file" multiple :accept="IMPORT_EXTENSIONS.join(',')" class="sr-only" @change="importFiles(($event.target as HTMLInputElement).files)">
+        <!-- Sin «accept»: Android no reconoce .bblx/.cmtx/.dctx y bloquearía los archivos -->
+        <input ref="fileInput" type="file" multiple class="sr-only" @change="importFiles(($event.target as HTMLInputElement).files)">
         <LoaderCircle v-if="importing" class="spin big" />
         <FileUp v-else class="big" />
         <strong>{{ $t('library.importText') }}</strong>
         <span class="btn btn-sm">{{ $t('library.importButton') }}</span>
         <small>{{ $t('library.importFormats') }}</small>
       </label>
+      <ul v-if="results.length" class="results">
+        <li v-for="(r, i) in results" :key="i" :class="{ ok: r.ok }">
+          <CircleCheck v-if="r.ok" /><TriangleAlert v-else />
+          <span><strong>{{ r.name }}</strong>{{ r.message }}</span>
+        </li>
+      </ul>
       <p class="legal"><ShieldCheck /> {{ $t('library.importLegal') }}</p>
     </section>
   </div>
@@ -153,6 +167,12 @@ const meta = (m: InstalledModule) => [
 .drop strong { font-weight: 550; max-width: 52ch; color: var(--text-2); }
 .drop small { color: var(--text-3); font-size: 12.5px; }
 .big { width: 34px; height: 34px; color: var(--accent); }
+.results { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 8px; }
+.results li { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 12px; background: rgba(192, 57, 43, 0.07); font-size: 14px; color: var(--text-2); }
+.results li.ok { background: var(--accent-soft); }
+.results li svg { width: 18px; height: 18px; flex: none; margin-top: 2px; color: #c0392b; }
+.results li.ok svg { color: var(--accent); }
+.results strong { display: block; color: var(--text); font-weight: 650; overflow-wrap: anywhere; }
 .legal { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 13px; color: var(--text-3); }
 .legal svg { width: 16px; height: 16px; flex: none; }
 </style>

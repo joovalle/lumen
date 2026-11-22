@@ -20,6 +20,18 @@ export interface CatalogEntry {
 
 /** Extensiones que se intentan abrir como módulos SQLite. */
 export const IMPORT_EXTENSIONS = ['.bblx', '.cmtx', '.dctx', '.mybible', '.sqlite', '.sqlite3', '.db']
+/** Formatos antiguos de e-Sword (≤ 8, base de datos Access) → su equivalente moderno */
+export const OLD_ESWORD: Record<string, string> = { '.bbl': '.bblx', '.cmt': '.cmtx', '.dct': '.dctx', '.top': '.topx', '.dev': '.devx', '.not': '.notx', '.ref': '.refx' }
+
+export class ImportError extends Error {
+  readonly kind: 'old' | 'unknown'
+  constructor(kind: 'old' | 'unknown', message: string) {
+    super(message)
+    this.kind = kind
+  }
+}
+
+const extOf = (name: string) => (/\.[^.]+$/.exec(name.toLowerCase())?.[0] ?? '')
 
 export const useLibrary = defineStore('library', () => {
   const installed = ref<InstalledModule[]>([])
@@ -124,6 +136,13 @@ export const useLibrary = defineStore('library', () => {
   }
 
   async function importFile(file: File): Promise<InstalledModule> {
+    const ext = extOf(file.name)
+    if (OLD_ESWORD[ext]) throw new ImportError('old', ext)
+    // Se intenta abrir cualquier archivo SQLite; si no lo es, el motor da un error claro
+    if (ext && !IMPORT_EXTENSIONS.includes(ext) && !ext.match(/^\.(bblx|cmtx|dctx)$/)) {
+      const head = new TextDecoder().decode(new Uint8Array(await file.slice(0, 16).arrayBuffer()))
+      if (!head.startsWith('SQLite format 3')) throw new ImportError('unknown', ext)
+    }
     const id = `user-${file.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${file.size.toString(36)}`
     const existing = get(id)
     if (existing) return existing
