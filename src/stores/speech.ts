@@ -26,8 +26,10 @@ export const useSpeech = defineStore('speech', () => {
   const index = ref(0)
   /** Último problema al hablar: 'blocked' (el navegador pidió un toque) o 'failed' */
   const error = ref<'blocked' | 'failed' | null>(null)
+  /** Código exacto del último error del motor (p. ej. «synthesis-failed») */
+  const errorCode = ref<string | null>(null)
   const voices = shallowRef<SpeechSynthesisVoice[]>([])
-  const prefs = useLocalStorage('lumen.speech', { rate: 1, voiceURI: '', autoNext: true }, { mergeDefaults: true })
+  const prefs = useLocalStorage('lumen.speech', { rate: 1, voiceURI: '', autoNext: true, level: 0 }, { mergeDefaults: true })
   let session = 0
   let keepAlive: ReturnType<typeof setInterval> | null = null
 
@@ -66,8 +68,11 @@ export const useSpeech = defineStore('speech', () => {
    * iPhone/iPad solo permiten hablar si la primera lectura empieza dentro del toque:
    * se «despierta» el motor con una frase vacía en el mismo gesto.
    */
+  /** Solo iPhone/iPad necesitan «despertar» el motor dentro del toque (en Android puede trabarlo). */
+  const isApple = typeof navigator !== 'undefined' &&
+    (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1))
   function prime() {
-    if (!synth || primed) return
+    if (!synth || primed || !isApple) return
     primed = true
     try {
       const u = new SpeechSynthesisUtterance(' ')
@@ -77,35 +82,64 @@ export const useSpeech = defineStore('speech', () => {
     } catch { /* sin efecto */ }
   }
 
-  function speakCurrent(retry = 0) {
+  /** Registro de lo que responde el motor de voz (para el diagnóstico). */
+  const diag = ref<string[]>([])
+  function log(msg: string) {
+    const t = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    diag.value = [...diag.value.slice(-24), `${t} ${msg}`]
+  }
+
+  /**
+   * Niveles de compatibilidad: 0 = voz elegida + idioma; 1 = solo idioma;
+   * 2 = voz predeterminada del teléfono. Si un nivel falla, se baja al siguiente
+   * y se recuerda el que funcionó en ese dispositivo.
+   */
+  function utterance(text: string, level: number) {
+    const u = new SpeechSynthesisUtterance(text)
+    if (level < 2) u.lang = voice.value?.lang ?? lang.value
+    if (level < 1 && voice.value) u.voice = voice.value
+    u.rate = prefs.value.rate
+    return u
+  }
+
+  function speakCurrent(level = prefs.value.level) {
     if (!synth || !current.value) return
     const my = ++session
     // Android descarta lo que se pide justo después de cancel(): se espera un instante
     if (synth.speaking || synth.pending) cancelNow()
     const wait = Math.max(0, 150 - (performance.now() - cancelledAt))
+    const fallback = (why: string) => {
+      if (my !== session) return
+      log(`✗ ${why} (nivel ${level})`)
+      if (level < 2) {
+        prefs.value.level = level + 1
+        speakCurrent(level + 1)
+      } else {
+        state.value = 'paused'
+        error.value = why === 'not-allowed' ? 'blocked' : 'failed'
+        errorCode.value = why
+      }
+    }
     const go = () => {
       if (my !== session || !current.value) return
-      const u = new SpeechSynthesisUtterance(current.value.text)
-      u.lang = voice.value?.lang ?? lang.value
-      if (voice.value) u.voice = voice.value
-      u.rate = prefs.value.rate
+      const u = utterance(current.value.text, level)
       let started = false
-      u.onstart = () => { started = true; error.value = null }
+      u.onstart = () => { started = true; error.value = null; if (prefs.value.level !== level) prefs.value.level = level; log(`▶ inicio v.${current.value?.verse} (nivel ${level})`) }
       u.onend = () => { if (my === session && state.value === 'playing') void advance() }
       u.onerror = (e) => {
         if (my !== session || e.error === 'interrupted' || e.error === 'canceled') return
-        state.value = 'paused'
-        error.value = e.error === 'not-allowed' ? 'blocked' : 'failed'
+        fallback(e.error || 'error')
       }
       // El motor puede haber quedado en pausa interna: se reactiva antes de hablar
       synth.resume()
       synth.speak(u)
-      // Si el teléfono no empieza a hablar, se reintenta una vez
+      log(`→ hablar v.${current.value.verse} · ${u.lang || 'idioma del teléfono'}${u.voice ? ` · ${u.voice.name}` : ''}`)
+      // Si no empieza a hablar en unos segundos, se prueba con una configuración más simple
       setTimeout(() => {
-        if (my !== session || started || synth.speaking || state.value !== 'playing') return
-        if (retry < 1) speakCurrent(retry + 1)
-        else if (!synth.speaking) { state.value = 'paused'; error.value = 'failed' }
-      }, 2500)
+        if (my !== session || started || state.value !== 'playing') return
+        if (synth.speaking) { started = true; return }
+        fallback('sin respuesta')
+      }, 3000)
     }
     if (wait > 0) setTimeout(go, wait)
     else go()
@@ -114,6 +148,19 @@ export const useSpeech = defineStore('speech', () => {
     if (voice.value && !voice.value.localService) {
       keepAlive = setInterval(() => { if (synth.speaking && !synth.paused) { synth.pause(); synth.resume() } }, 10_000)
     }
+  }
+
+  /** Prueba directa desde el diagnóstico (dentro del toque, sin cargar nada antes). */
+  function test(text: string) {
+    if (!synth) return log('✗ este navegador no tiene speechSynthesis')
+    if (synth.speaking || synth.pending) cancelNow()
+    const u = new SpeechSynthesisUtterance(text)
+    u.lang = lang.value
+    u.onstart = () => log('✓ prueba: el teléfono empezó a hablar')
+    u.onend = () => log('✓ prueba terminada')
+    u.onerror = (e) => log(`✗ prueba: ${e.error}`)
+    synth.resume()
+    setTimeout(() => { synth.speak(u); log(`→ prueba · ${u.lang}`) }, Math.max(0, 150 - (performance.now() - cancelledAt)))
   }
 
   async function advance() {
@@ -157,7 +204,10 @@ export const useSpeech = defineStore('speech', () => {
   function resume() {
     if (state.value !== 'paused') return
     prime()
+    // Tras un fallo, al tocar ▶ se vuelve a intentar desde la configuración completa
+    if (error.value === 'failed') prefs.value.level = 0
     error.value = null
+    errorCode.value = null
     state.value = 'playing'
     speakCurrent()
   }
@@ -185,11 +235,12 @@ export const useSpeech = defineStore('speech', () => {
   }
   function setVoice(uri: string) {
     prefs.value.voiceURI = uri
+    prefs.value.level = 0
     if (state.value === 'playing') speakCurrent()
   }
 
   return {
-    supported, state, error, bibleId, passage, verses, index, current, prefs, lang, voicesForLang, voice,
+    supported, state, error, errorCode, diag, test, voices, bibleId, passage, verses, index, current, prefs, lang, voicesForLang, voice,
     start, pause, resume, toggle, stop, step, setRate, setVoice,
   }
 })

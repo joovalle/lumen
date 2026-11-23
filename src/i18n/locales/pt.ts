@@ -73,6 +73,7 @@ export default {
     new: 'Novo', soon: 'Em breve', soonToast: 'Este recurso chegará em breve.',
   },
   listen: {
+    diagnostics: 'Diagnóstico de voz', test: 'Testar voz', testPhrase: 'Olá. Este é um teste de voz do Lumen.',
     tapToStart: 'Toque em ▶ para começar a ouvir.', failed: 'O celular não respondeu. Toque em ▶ para tentar de novo; se continuar, verifique se há uma voz instalada (Configurações → Conversão de texto em voz).',
     listening: 'Ouvindo', listenChapter: 'Ouvir este capítulo', play: 'Reproduzir', pause: 'Pausar', stop: 'Parar',
     prev: 'Anterior', next: 'Próximo', speed: 'Velocidade', settings: 'Opções de leitura', voice: 'Voz', verse: 'v. {n}',

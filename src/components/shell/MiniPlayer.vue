@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Check, Headphones, LoaderCircle, Pause, Play, SkipBack, SkipForward, SlidersHorizontal, X } from 'lucide-vue-next'
+import { Check, Copy, Headphones, LoaderCircle, Pause, Play, SkipBack, SkipForward, SlidersHorizontal, Stethoscope, X } from 'lucide-vue-next'
+import { useI18n } from 'vue-i18n'
+import { toast } from '@/composables/toast'
 import PopMenu from '@/components/common/PopMenu.vue'
 import { bookByNumber, bookByOsis } from '@/core/canon'
 import { useLocale } from '@/composables/locale'
@@ -16,6 +18,27 @@ const library = useLibrary()
 const route = useRoute()
 const router = useRouter()
 const { passage } = useLocale()
+const { t } = useI18n()
+
+/** Navegador, para el diagnóstico (Samsung Internet y Chrome se comportan distinto). */
+const browser = computed(() => {
+  const ua = navigator.userAgent
+  const name = /SamsungBrowser\/([\d.]+)/.exec(ua)?.[0] ?? /EdgA?\/([\d.]+)/.exec(ua)?.[0] ?? /Firefox\/([\d.]+)/.exec(ua)?.[0]
+    ?? /CriOS\/([\d.]+)/.exec(ua)?.[0] ?? /Chrome\/([\d.]+)/.exec(ua)?.[0] ?? (/Safari/.test(ua) ? 'Safari' : ua.slice(0, 40))
+  const os = /Android [\d.]+/.exec(ua)?.[0] ?? /iPhone OS [\d_]+/.exec(ua)?.[0]?.replace(/_/g, '.') ?? ''
+  return `${name} · ${os}`
+})
+const report = computed(() => [
+  `Lumen · ${browser.value}`,
+  `Voces: ${speech.voices.length} en total, ${speech.voicesForLang.length} para «${speech.lang}»`,
+  `Voz elegida: ${speech.voice?.name ?? '(ninguna)'} · nivel ${speech.prefs.level}`,
+  `Último error: ${speech.errorCode ?? '—'}`,
+  ...speech.diag,
+].join('\n'))
+async function copyReport() {
+  await navigator.clipboard.writeText(report.value)
+  toast(t('selection.copied'), 'success')
+}
 
 const label = computed(() => (speech.passage ? passage(speech.passage) : ''))
 const abbr = computed(() => (speech.bibleId ? library.get(speech.bibleId)?.info.abbreviation ?? '' : ''))
@@ -50,7 +73,7 @@ function cycleRate() {
       </button>
       <button class="info" @click="open">
         <strong><Headphones /> {{ label }}</strong>
-        <span v-if="speech.error" class="err">{{ $t(speech.error === 'blocked' ? 'listen.tapToStart' : 'listen.failed') }}</span>
+        <span v-if="speech.error" class="err">{{ $t(speech.error === 'blocked' ? 'listen.tapToStart' : 'listen.failed') }}<template v-if="speech.errorCode"> ({{ speech.errorCode }})</template></span>
         <span v-else>{{ abbr }}<template v-if="speech.current"> · {{ $t('listen.verse', { n: speech.current.verse }) }}</template></span>
       </button>
       <button class="ctl hide-xs" :aria-label="$t('listen.prev')" @click="speech.step(-1)"><SkipBack /></button>
@@ -71,6 +94,14 @@ function cycleRate() {
             <button class="btn btn-sm" @click="speech.step(-1)"><SkipBack /> {{ $t('listen.prev') }}</button>
             <button class="btn btn-sm" @click="speech.step(1)">{{ $t('listen.next') }} <SkipForward /></button>
           </div>
+          <details class="diag">
+            <summary><Stethoscope /> {{ $t('listen.diagnostics') }}</summary>
+            <pre>{{ report }}</pre>
+            <div class="steps">
+              <button class="btn btn-sm" @click="speech.test($t('listen.testPhrase'))">{{ $t('listen.test') }}</button>
+              <button class="btn btn-sm" @click="copyReport"><Copy /> {{ $t('common.copy') }}</button>
+            </div>
+          </details>
         </div>
       </PopMenu>
       <button class="ctl" :aria-label="$t('listen.stop')" @click="speech.stop()"><X /></button>
@@ -108,6 +139,10 @@ function cycleRate() {
 .auto { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 8px; border-top: 1px solid var(--border); margin-top: 6px; font-size: 14px; }
 .steps { display: flex; gap: 6px; padding: 4px; }
 .steps .btn { flex: 1; }
+.diag { margin-top: 6px; border-top: 1px solid var(--border); padding-top: 6px; }
+.diag summary { display: flex; align-items: center; gap: 6px; padding: 6px 8px; font-size: 13px; font-weight: 600; color: var(--text-2); cursor: pointer; }
+.diag summary svg { width: 15px; height: 15px; }
+.diag pre { margin: 4px; padding: 10px; border-radius: 10px; background: var(--surface); font-size: 11px; line-height: 1.45; white-space: pre-wrap; word-break: break-word; max-height: 220px; overflow: auto; }
 @media (max-width: 720px) {
   .player { bottom: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom) + 10px); }
   .hide-xs { display: none; }
