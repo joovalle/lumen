@@ -24,6 +24,8 @@ export const useSpeech = defineStore('speech', () => {
   const passage = ref<Passage | null>(null)
   const verses = shallowRef<{ verse: number; text: string }[]>([])
   const index = ref(0)
+  /** Último problema al hablar: 'blocked' (el navegador pidió un toque) o 'failed' */
+  const error = ref<'blocked' | 'failed' | null>(null)
   const voices = shallowRef<SpeechSynthesisVoice[]>([])
   const prefs = useLocalStorage('lumen.speech', { rate: 1, voiceURI: '', autoNext: true }, { mergeDefaults: true })
   let session = 0
@@ -53,20 +55,60 @@ export const useSpeech = defineStore('speech', () => {
     ?? null,
   )
 
-  function speakCurrent() {
+  let primed = false
+  /** Momento de la última cancelación: Android descarta lo que se pide justo después */
+  let cancelledAt = -Infinity
+  function cancelNow() {
+    synth?.cancel()
+    cancelledAt = performance.now()
+  }
+  /**
+   * iPhone/iPad solo permiten hablar si la primera lectura empieza dentro del toque:
+   * se «despierta» el motor con una frase vacía en el mismo gesto.
+   */
+  function prime() {
+    if (!synth || primed) return
+    primed = true
+    try {
+      const u = new SpeechSynthesisUtterance(' ')
+      u.volume = 0
+      synth.resume()
+      synth.speak(u)
+    } catch { /* sin efecto */ }
+  }
+
+  function speakCurrent(retry = 0) {
     if (!synth || !current.value) return
     const my = ++session
-    synth.cancel()
-    const u = new SpeechSynthesisUtterance(current.value.text)
-    u.lang = voice.value?.lang ?? lang.value
-    if (voice.value) u.voice = voice.value
-    u.rate = prefs.value.rate
-    u.onend = () => { if (my === session && state.value === 'playing') advance() }
-    u.onerror = (e) => {
-      if (my !== session || e.error === 'interrupted' || e.error === 'canceled') return
-      state.value = 'paused'
+    // Android descarta lo que se pide justo después de cancel(): se espera un instante
+    if (synth.speaking || synth.pending) cancelNow()
+    const wait = Math.max(0, 150 - (performance.now() - cancelledAt))
+    const go = () => {
+      if (my !== session || !current.value) return
+      const u = new SpeechSynthesisUtterance(current.value.text)
+      u.lang = voice.value?.lang ?? lang.value
+      if (voice.value) u.voice = voice.value
+      u.rate = prefs.value.rate
+      let started = false
+      u.onstart = () => { started = true; error.value = null }
+      u.onend = () => { if (my === session && state.value === 'playing') void advance() }
+      u.onerror = (e) => {
+        if (my !== session || e.error === 'interrupted' || e.error === 'canceled') return
+        state.value = 'paused'
+        error.value = e.error === 'not-allowed' ? 'blocked' : 'failed'
+      }
+      // El motor puede haber quedado en pausa interna: se reactiva antes de hablar
+      synth.resume()
+      synth.speak(u)
+      // Si el teléfono no empieza a hablar, se reintenta una vez
+      setTimeout(() => {
+        if (my !== session || started || synth.speaking || state.value !== 'playing') return
+        if (retry < 1) speakCurrent(retry + 1)
+        else if (!synth.speaking) { state.value = 'paused'; error.value = 'failed' }
+      }, 2500)
     }
-    synth.speak(u)
+    if (wait > 0) setTimeout(go, wait)
+    else go()
     // Chrome de escritorio corta las voces en línea tras ~15 s: pausa/reanuda periódicamente
     if (keepAlive) clearInterval(keepAlive)
     if (voice.value && !voice.value.localService) {
@@ -88,8 +130,10 @@ export const useSpeech = defineStore('speech', () => {
   /** Empieza a leer un capítulo desde un versículo. */
   async function start(id: string, book: number, chapter: number, fromVerse = 1) {
     if (!synth) return
+    prime()
+    error.value = null
     const my = ++session
-    synth.cancel()
+    if (synth.speaking || synth.pending) cancelNow()
     state.value = 'loading'
     const library = useLibrary()
     await library.ensureOpen(id)
@@ -107,11 +151,13 @@ export const useSpeech = defineStore('speech', () => {
   function pause() {
     if (state.value !== 'playing') return
     session++
-    synth?.cancel()
+    cancelNow()
     state.value = 'paused'
   }
   function resume() {
     if (state.value !== 'paused') return
+    prime()
+    error.value = null
     state.value = 'playing'
     speakCurrent()
   }
@@ -121,7 +167,7 @@ export const useSpeech = defineStore('speech', () => {
   }
   function stop() {
     session++
-    synth?.cancel()
+    cancelNow()
     if (keepAlive) clearInterval(keepAlive)
     state.value = 'idle'
     passage.value = null
@@ -143,7 +189,7 @@ export const useSpeech = defineStore('speech', () => {
   }
 
   return {
-    supported, state, bibleId, passage, verses, index, current, prefs, lang, voicesForLang, voice,
+    supported, state, error, bibleId, passage, verses, index, current, prefs, lang, voicesForLang, voice,
     start, pause, resume, toggle, stop, step, setRate, setVoice,
   }
 })

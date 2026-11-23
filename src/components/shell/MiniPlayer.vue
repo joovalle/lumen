@@ -50,7 +50,8 @@ function cycleRate() {
       </button>
       <button class="info" @click="open">
         <strong><Headphones /> {{ label }}</strong>
-        <span>{{ abbr }}<template v-if="speech.current"> · {{ $t('listen.verse', { n: speech.current.verse }) }}</template></span>
+        <span v-if="speech.error" class="err">{{ $t(speech.error === 'blocked' ? 'listen.tapToStart' : 'listen.failed') }}</span>
+        <span v-else>{{ abbr }}<template v-if="speech.current"> · {{ $t('listen.verse', { n: speech.current.verse }) }}</template></span>
       </button>
       <button class="ctl hide-xs" :aria-label="$t('listen.prev')" @click="speech.step(-1)"><SkipBack /></button>
       <button class="ctl hide-xs" :aria-label="$t('listen.next')" @click="speech.step(1)"><SkipForward /></button>
@@ -91,6 +92,7 @@ function cycleRate() {
 .info { flex: 1; min-width: 0; display: grid; text-align: left; border: 0; background: transparent; padding: 2px 8px; }
 .info strong { display: flex; align-items: center; gap: 6px; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .info strong svg { width: 15px; height: 15px; color: var(--accent); flex: none; }
+.info .err { color: #b9770e; white-space: normal; }
 .info span { font-size: 12px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ctl { display: grid; place-items: center; width: 36px; height: 36px; border: 0; border-radius: 10px; background: transparent; color: var(--text-2); flex: none; }
 .ctl:hover { background: var(--surface); color: var(--text); }

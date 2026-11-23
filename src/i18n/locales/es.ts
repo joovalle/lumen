@@ -71,6 +71,7 @@ export default {
     new: 'Nuevo', soon: 'Pronto', soonToast: 'Esta función llegará pronto.',
   },
   listen: {
+    tapToStart: 'Toca ▶ para empezar a escuchar.', failed: 'El teléfono no respondió. Toca ▶ para reintentar; si sigue igual, revisa que tenga una voz instalada (Ajustes → Texto a voz).',
     listening: 'Escuchando', listenChapter: 'Escuchar este capítulo', play: 'Reproducir', pause: 'Pausa', stop: 'Detener',
     prev: 'Anterior', next: 'Siguiente', speed: 'Velocidad', settings: 'Opciones de lectura', voice: 'Voz', verse: 'v. {n}',
     autoNext: 'Seguir con el capítulo siguiente', noVoice: 'Este dispositivo no tiene una voz instalada para este idioma; se usará la voz predeterminada.',
