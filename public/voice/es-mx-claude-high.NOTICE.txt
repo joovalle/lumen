@@ -1,0 +1,4 @@
+Voz «claude» (es_MX, calidad alta) — HirCoir, https://huggingface.co/spaces/HirCoir/Piper-TTS-Spanish
+Licencia: Apache License 2.0 — https://www.apache.org/licenses/LICENSE-2.0
+Modelo exportado por k2-fsa/sherpa-onnx (Apache-2.0); arquitectura Piper (MIT). Lumen lo usa sin modificaciones
+(solo se comprime con gzip para la descarga).

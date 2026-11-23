@@ -2,16 +2,18 @@
  * Prepara la «voz de Lumen»: lectura en voz alta que funciona dentro de la app,
  * sin depender del motor de voz del teléfono.
  *
- *  - Modelo de voz Piper «carlfm» (español, dataset de dominio público),
- *    descargado de las publicaciones oficiales de rhasspy/piper en GitHub.
+ *  - Modelo de voz Piper «claude» (español latinoamericano, México; Apache-2.0),
+ *    tal como lo publica el proyecto k2-fsa/sherpa-onnx en GitHub.
  *  - Datos del fonemizador (espeak-ng) del paquete @diffusionstudio/piper-wasm.
  *
  * Los archivos grandes se guardan comprimidos (gzip) en public/voice/ y la app
  * los descomprime en el dispositivo. Uso: npm run build:voice
  */
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
-import { gunzipSync, gzipSync } from 'node:zlib'
+import { execFileSync } from 'node:child_process'
+import { tmpdir } from 'node:os'
+import { gzipSync } from 'node:zlib'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -21,23 +23,29 @@ const cache = join(root, 'node_modules', '.cache', 'lumen-sources')
 const PIPER = join(root, 'node_modules', '@diffusionstudio', 'piper-wasm', 'build')
 
 const VOICE = {
-  id: 'es-carlfm-x-low',
-  url: 'https://github.com/rhasspy/piper/releases/download/v0.0.2/voice-es-carlfm-x-low.tar.gz',
+  id: 'es-mx-claude-high',
+  url: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-piper-es_MX-claude-high.tar.bz2',
   lang: 'es',
-  name: 'Carlos (español)',
-  license: 'Dominio público (dataset carlfm01/my-speech-datasets) · modelo Piper (MIT)',
+  name: 'Voz latina (México)',
+  license: 'Voz «claude» de HirCoir (Apache-2.0) · modelo Piper (MIT)',
 }
 
-function untar(tgz) {
-  const tar = gunzipSync(tgz)
+/** Extrae el paquete (.tar.bz2) con el tar del sistema; Node no trae bzip2. */
+async function untar(archive) {
+  const dir = await mkdtemp(join(tmpdir(), 'lumen-voice-'))
+  const tmp = join(dir, 'voice.tar.bz2')
+  await writeFile(tmp, archive)
+  execFileSync('tar', ['-xjf', tmp, '-C', dir, '--exclude=*/espeak-ng-data/*'])
   const files = {}
-  for (let off = 0; off + 512 <= tar.length; ) {
-    const name = tar.subarray(off, off + 100).toString().replace(/\0.*$/s, '')
-    if (!name) break
-    const size = parseInt(tar.subarray(off + 124, off + 136).toString().replace(/\0.*$/s, '').trim(), 8) || 0
-    files[name.replace(/^\.\//, '')] = tar.subarray(off + 512, off + 512 + size)
-    off += 512 + Math.ceil(size / 512) * 512
+  const walk = async (d) => {
+    for (const e of await readdir(d, { withFileTypes: true })) {
+      const p = join(d, e.name)
+      if (e.isDirectory()) await walk(p)
+      else if (p !== tmp) files[e.name] = await readFile(p)
+    }
   }
+  await walk(dir)
+  await rm(dir, { recursive: true, force: true })
   return files
 }
 
@@ -55,7 +63,9 @@ async function cached(url, name) {
 
 async function main() {
   await mkdir(out, { recursive: true })
-  const files = untar(await cached(VOICE.url, `${VOICE.id}.tar.gz`))
+  // Se quitan las voces anteriores
+  for (const f of await readdir(out)) if (/\.(onnx\.gz|onnx\.json|MODEL_CARD\.txt|NOTICE\.txt)$/.test(f)) await rm(join(out, f))
+  const files = await untar(await cached(VOICE.url, `${VOICE.id}.tar.bz2`))
   const onnx = Object.entries(files).find(([n]) => n.endsWith('.onnx'))?.[1]
   const config = Object.entries(files).find(([n]) => n.endsWith('.onnx.json'))?.[1]
   const card = files['MODEL_CARD']
@@ -65,6 +75,11 @@ async function main() {
   await writeFile(join(out, `${VOICE.id}.onnx.gz`), model)
   await writeFile(join(out, `${VOICE.id}.onnx.json`), config)
   if (card) await writeFile(join(out, `${VOICE.id}.MODEL_CARD.txt`), card)
+  await writeFile(join(out, `${VOICE.id}.NOTICE.txt`),
+    `Voz «claude» (es_MX, calidad alta) — HirCoir, https://huggingface.co/spaces/HirCoir/Piper-TTS-Spanish\n` +
+    `Licencia: Apache License 2.0 — https://www.apache.org/licenses/LICENSE-2.0\n` +
+    `Modelo exportado por k2-fsa/sherpa-onnx (Apache-2.0); arquitectura Piper (MIT). Lumen lo usa sin modificaciones\n` +
+    `(solo se comprime con gzip para la descarga).\n`)
 
   const data = gzipSync(await readFile(join(PIPER, 'piper_phonemize.data')), { level: 9 })
   await writeFile(join(out, 'piper_phonemize.data.gz'), data)

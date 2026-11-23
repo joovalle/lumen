@@ -71,7 +71,7 @@ export default {
     new: 'Nuevo', soon: 'Pronto', soonToast: 'Esta función llegará pronto.',
   },
   listen: {
-    engine: 'Motor de voz', engineSystem: 'Del teléfono', engineLumen: 'De Lumen', lumenOfferText: 'Tu teléfono no puede leer en voz alta. Lumen tiene su propia voz en español.', lumenOffer: 'Descargar voz ({size})', lumenUse: 'Usar la voz de Lumen', lumenDownloading: 'Descargando la voz de Lumen… {p} %', lumenRemove: 'Eliminar la voz de Lumen', lumenOnlyEs: 'La voz de Lumen solo habla español por ahora; con esta versión se usa la voz del teléfono.', lumenAbout: 'La voz de Lumen funciona en cualquier teléfono y sin internet una vez descargada (una sola vez). Voz en español de dominio público.',
+    engine: 'Motor de voz', engineSystem: 'Del teléfono', engineLumen: 'De Lumen', lumenOfferText: 'Tu teléfono no puede leer en voz alta. Lumen tiene su propia voz en español latino.', lumenOffer: 'Descargar voz ({size})', lumenUse: 'Usar la voz de Lumen', lumenDownloading: 'Descargando la voz de Lumen… {p} %', lumenRemove: 'Eliminar la voz de Lumen', lumenOnlyEs: 'La voz de Lumen solo habla español por ahora; con esta versión se usa la voz del teléfono.', lumenAbout: 'La voz de Lumen funciona en cualquier teléfono y sin internet una vez descargada (una sola vez). Voz natural en español latinoamericano.',
     testMinimal: 'Prueba mínima',
     engineShort: 'El motor de voz del teléfono no responde. Abre las opciones (☰) para ver cómo arreglarlo.',
     engineTitle: 'El teléfono rechazó la lectura. Suele arreglarse así:',

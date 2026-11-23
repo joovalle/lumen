@@ -33,7 +33,7 @@ export default defineConfig({
       workbox: {
         // La app completa (incluido el motor SQLite) queda disponible sin conexión.
         globPatterns: ['**/*.{js,css,html,wasm,woff2,svg,png}'],
-        // La voz de Lumen (≈32 MB) se descarga solo si la persona la pide
+        // La voz de Lumen (≈70 MB) se descarga solo si la persona la pide
         globIgnores: ['voice/**', '**/ort-wasm*.wasm', '**/piper_phonemize*'],
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         navigateFallback: 'index.html',

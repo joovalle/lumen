@@ -149,36 +149,52 @@ export const useSpeech = defineStore('speech', () => {
       audio.play().catch(() => undefined)
     }
   }
-  const prepared = new Map<number, Promise<string>>()
+  // Cada versículo se prepara por frases: la primera suena enseguida y el resto
+  // (y el versículo siguiente) se sintetiza mientras se escucha.
+  const prepared = new Map<number, Promise<string>[]>()
+  const revoke = (p: Promise<string>) => void p.then((u) => URL.revokeObjectURL(u)).catch(() => undefined)
   function clearPrepared() {
-    for (const p of prepared.values()) void p.then((u) => URL.revokeObjectURL(u)).catch(() => undefined)
+    for (const list of prepared.values()) list.forEach(revoke)
     prepared.clear()
   }
-  function prepare(i: number): Promise<string> | undefined {
+  function prepare(i: number): Promise<string>[] | undefined {
     const v = verses.value[i]
     if (!v) return undefined
-    let p = prepared.get(i)
-    if (!p) {
-      p = lumenVoice.synthesize(v.text, prefs.value.rate).then(({ pcm, sampleRate }) => URL.createObjectURL(lumenVoice.toWav(pcm, sampleRate)))
-      prepared.set(i, p)
+    let list = prepared.get(i)
+    if (!list) {
+      const rate = prefs.value.rate
+      list = lumenVoice.chunks(v.text).map((text) =>
+        lumenVoice.synthesize(text, rate).then(({ pcm, sampleRate }) => URL.createObjectURL(lumenVoice.toWav(pcm, sampleRate))))
+      list.forEach((p) => p.catch(() => undefined)) // los errores se atienden al reproducir
+      prepared.set(i, list)
     }
-    return p
+    return list
   }
 
   async function speakLumen() {
     const my = ++session
     const i = index.value
-    audio ??= new Audio()
+    const el = (audio ??= new Audio())
+    const alive = () => my === session && state.value === 'playing'
     try {
-      const url = await prepare(i)
-      if (!url || my !== session || state.value !== 'playing') return
-      audio.src = url
-      audio.onended = () => { if (my === session && state.value === 'playing') void advance() }
-      await audio.play()
-      log(`▶ voz de Lumen v.${current.value?.verse}`)
-      void prepare(i + 1) // el siguiente versículo se prepara mientras suena este
-      // Se liberan los audios ya escuchados
-      for (const k of [...prepared.keys()]) if (k < i - 1) { void prepared.get(k)!.then((u) => URL.revokeObjectURL(u)); prepared.delete(k) }
+      const list = prepare(i)
+      if (!list) return
+      for (let j = 0; j < list.length; j++) {
+        const url = await list[j]
+        if (!alive()) return
+        const ended = new Promise<void>((done) => { el.onended = () => done() })
+        el.src = url
+        await el.play()
+        if (j === 0) {
+          log(`▶ voz de Lumen v.${current.value?.verse}`)
+          void prepare(i + 1) // el siguiente versículo se prepara mientras suena este
+          // Se liberan los audios ya escuchados
+          for (const k of [...prepared.keys()]) if (k < i - 1) { prepared.get(k)!.forEach(revoke); prepared.delete(k) }
+        }
+        await ended
+        if (!alive()) return
+      }
+      void advance()
     } catch (e) {
       if (my !== session) return
       const name = (e as Error).name
@@ -322,7 +338,7 @@ export const useSpeech = defineStore('speech', () => {
     errorCode.value = null
     state.value = 'playing'
     // Voz de Lumen en pausa: se retoma el mismo audio
-    if (usingLumen.value && audio && audio.src && audio.src !== SILENT && audio.paused && !wasError) {
+    if (usingLumen.value && audio && audio.src && audio.src !== SILENT && audio.paused && !audio.ended && !wasError) {
       audio.play().catch(() => speakCurrent())
       return
     }
@@ -347,6 +363,7 @@ export const useSpeech = defineStore('speech', () => {
     if (i < 0 || i >= verses.value.length) return
     index.value = i
     if (state.value === 'playing') speakCurrent()
+    else if (audio) { session++; audio.removeAttribute('src') } // al reanudar, empieza en el nuevo versículo
   }
   function setRate(rate: number) {
     prefs.value.rate = rate

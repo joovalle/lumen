@@ -1,14 +1,14 @@
 {
   "version": 1,
   "voice": {
-    "id": "es-carlfm-x-low",
+    "id": "es-mx-claude-high",
     "lang": "es",
-    "name": "Carlos (español)",
-    "license": "Dominio público (dataset carlfm01/my-speech-datasets) · modelo Piper (MIT)",
-    "model": "voice/es-carlfm-x-low.onnx.gz",
-    "config": "voice/es-carlfm-x-low.onnx.json",
+    "name": "Voz latina (México)",
+    "license": "Voz «claude» de HirCoir (Apache-2.0) · modelo Piper (MIT)",
+    "model": "voice/es-mx-claude-high.onnx.gz",
+    "config": "voice/es-mx-claude-high.onnx.json",
     "sizes": {
-      "model": 18801792,
+      "model": 58301982,
       "data": 9067873
     }
   },

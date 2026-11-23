@@ -1,6 +1,6 @@
 /**
  * «Voz de Lumen»: lectura en voz alta que no depende del motor de voz del teléfono.
- * Los archivos (≈32 MB comprimidos) se descargan una sola vez, se guardan en el
+ * Los archivos (≈70 MB comprimidos) se descargan una sola vez, se guardan en el
  * dispositivo (Cache Storage) y desde entonces funciona sin internet.
  */
 const CACHE = 'lumen-voice-v1'
@@ -73,22 +73,25 @@ export async function install(onProgress: (p: number) => void): Promise<void> {
     const res = await fetch(f.url)
     if (!res.ok || !res.body) throw new Error(`No se pudo descargar la voz (${res.status})`)
     const reader = res.body.getReader()
-    const chunks: Uint8Array[] = []
+    const bufs: Uint8Array[] = []
     let got = 0
     for (;;) {
       const { done: end, value } = await reader.read()
       if (end) break
-      chunks.push(value)
+      bufs.push(value)
       got += value.length
       onProgress(Math.min(0.99, (done + Math.min(got, f.size)) / total))
     }
-    await cache.put(f.url, new Response(new Blob(chunks as BlobPart[])))
+    await cache.put(f.url, new Response(new Blob(bufs as BlobPart[])))
     done += f.size
   }
   // La descripción de la voz también queda guardada (para usarla sin internet)
   const murl = new URL('voice/voice.json', document.baseURI).href
   const mres = await fetch(murl, { cache: 'no-cache' }).catch(() => null)
   if (mres?.ok) await cache.put(murl, mres)
+  // Se borran los archivos de voces anteriores
+  const keep = new Set([...list.map((f) => f.url), murl])
+  for (const req of await cache.keys()) if (!keep.has(req.url)) await cache.delete(req)
   try { await navigator.storage?.persist?.() } catch { /* opcional */ }
   onProgress(1)
 }
@@ -138,6 +141,27 @@ export function load(): Promise<number> {
       worker!.postMessage({ type: 'init', ortWasm, piperWasm, piperData, model, config: new TextDecoder().decode(config) }, [ortWasm, piperWasm, piperData, model])
     })
   })().catch((e) => { ready = null; throw e }))
+}
+
+/**
+ * Divide un versículo en frases cortas: la primera suena antes y, mientras se
+ * escucha, se preparan las siguientes (evita silencios en teléfonos lentos).
+ */
+export function chunks(text: string, firstMax = 70, max = 140): string[] {
+  const parts = text.replace(/\s+/g, ' ').trim().match(/[^.;:!?,]+(?:[.;:!?,]+[»"”’)]*|$)\s*/g) ?? []
+  const out: string[] = []
+  let cur = ''
+  for (const raw of parts) {
+    const part = raw.trim()
+    if (!part) continue
+    const limit = out.length ? max : firstMax
+    if (cur && (cur + ' ' + part).length > limit) { out.push(cur); cur = part }
+    else cur = cur ? cur + ' ' + part : part
+  }
+  if (cur) out.push(cur)
+  // Un trozo muy corto al final se une al anterior (suena más natural)
+  if (out.length > 1 && out[out.length - 1].length < 18) out[out.length - 2] += ' ' + out.pop()
+  return out.length ? out : [text]
 }
 
 /** Sintetiza un texto. rate 1 = normal; 1.25 = más rápido. */

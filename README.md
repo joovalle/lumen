@@ -17,7 +17,7 @@ Lumen es una aplicación **libre y gratuita** para leer y estudiar la Biblia, in
 |---|---|
 | Hoy | Pantalla de inicio con saludo, **versículo del día** (234 pasajes, igual para todos cada día, en tu versión) y «continuar leyendo» |
 | Devocional «Luz diaria» | Lectura de mañana y noche para cada día del año, basada en *Daily Light on the Daily Path* (familia Bagster, 1875, dominio público). Solo se guardan las referencias (verificadas una por una contra el texto original) y el texto se muestra en la versión de cada persona |
-| Escuchar | Lectura en voz alta. Usa la voz del dispositivo y, si no funciona, ofrece la **voz de Lumen** (Piper, ~32 MB, se descarga una sola vez y funciona sin internet). Resalta el versículo que suena; usa la voz del dispositivo (gratis, en el idioma de la versión): resalta el versículo que suena, pausa y retoma, velocidad 0.75×–1.5×, elección de voz y avance automático al capítulo siguiente |
+| Escuchar | Lectura en voz alta. Usa la voz del dispositivo y, si no funciona, ofrece la **voz de Lumen** (voz latinoamericana Piper, ~70 MB, se descarga una sola vez y funciona sin internet). Resalta el versículo que suena; usa la voz del dispositivo (gratis, en el idioma de la versión): resalta el versículo que suena, pausa y retoma, velocidad 0.75×–1.5×, elección de voz y avance automático al capítulo siguiente |
 | Planes de lectura | La Biblia en un año, NT en 90 días, Evangelios en 30, Salmos y Proverbios en un mes, AT en 9 meses. **Planes para grupos**: eliges libros, capítulos por día y fecha de inicio, y compartes un enlace por WhatsApp; quien lo abre se une con el mismo calendario. Progreso, días pendientes y «Leído, siguiente» al terminar cada capítulo |
 | Enlaces a pasajes | Al copiar o compartir versículos se incluye un enlace que abre Lumen en ese pasaje, resaltado |
 | Imágenes para compartir | Crea imágenes del versículo para **historias de Instagram, estados de WhatsApp y TikTok** (1080×1920), publicaciones verticales y cuadradas: 6 estilos + tu propia foto, 3 tipografías y firma con el nombre de tu iglesia. Se generan en el teléfono y se comparten desde su menú |
@@ -127,7 +127,7 @@ npx tauri build
 
 ## Voz de Lumen
 
-`npm run build:voice` prepara la voz propia (modelo Piper «carlfm», español, dataset de dominio público) en `public/voice/`. Usa ONNX Runtime Web (MIT) y el fonemizador de Piper compilado a WebAssembly (`@diffusionstudio/piper-wasm`, MIT), que incluye datos de **eSpeak NG (GPL-3.0)**. Por eso conviene que Lumen se publique con una licencia compatible con GPL-3.0.
+`npm run build:voice` prepara la voz propia (modelo Piper «claude», español latinoamericano de México, Apache-2.0, tomado de las publicaciones de k2-fsa/sherpa-onnx) en `public/voice/`. Usa ONNX Runtime Web (MIT) y el fonemizador de Piper compilado a WebAssembly (`@diffusionstudio/piper-wasm`, MIT), que incluye datos de **eSpeak NG (GPL-3.0)**. Por eso conviene que Lumen se publique con una licencia compatible con GPL-3.0.
 
 ## Donaciones
 
