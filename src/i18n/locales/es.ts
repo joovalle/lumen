@@ -71,6 +71,7 @@ export default {
     new: 'Nuevo', soon: 'Pronto', soonToast: 'Esta función llegará pronto.',
   },
   listen: {
+    testMinimal: 'Prueba mínima',
     engineShort: 'El motor de voz del teléfono no responde. Abre las opciones (☰) para ver cómo arreglarlo.',
     engineTitle: 'El teléfono rechazó la lectura. Suele arreglarse así:',
     engineSteps: ['Ajustes → Administración general → Idioma y entrada → Salida de texto a voz.', 'Motor preferido: «Servicios de voz de Google».', 'En su engranaje ⚙: Instalar datos de voz → Español.', 'Toca «Escuchar un ejemplo»: si ahí no suena, el problema es del teléfono.', 'Actualiza «Servicios de voz de Google» en Play Store y reinicia Chrome.'],

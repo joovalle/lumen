@@ -101,7 +101,8 @@ function cycleRate() {
           <details class="diag">
             <summary><Stethoscope /> {{ $t('listen.diagnostics') }}</summary>
             <pre>{{ report }}</pre>
-            <div class="steps">
+            <div class="steps wrap">
+              <button class="btn btn-sm" @click="speech.test($t('listen.testPhrase'), true)">{{ $t('listen.testMinimal') }}</button>
               <button class="btn btn-sm" @click="speech.test($t('listen.testPhrase'))">{{ $t('listen.test') }}</button>
               <button class="btn btn-sm" @click="copyReport"><Copy /> {{ $t('common.copy') }}</button>
             </div>
@@ -143,6 +144,7 @@ function cycleRate() {
 .auto { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 8px; border-top: 1px solid var(--border); margin-top: 6px; font-size: 14px; }
 .steps { display: flex; gap: 6px; padding: 4px; }
 .steps .btn { flex: 1; }
+.steps.wrap { flex-wrap: wrap; }
 .help { margin: 6px 4px; padding: 10px 12px; border-radius: 12px; background: rgba(185, 119, 14, 0.1); font-size: 12.5px; color: var(--text-2); }
 .help strong { display: block; color: var(--text); margin-bottom: 6px; }
 .help ol { margin: 0; padding-left: 18px; display: grid; gap: 4px; }

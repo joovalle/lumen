@@ -69,6 +69,7 @@ export const useSpeech = defineStore('speech', () => {
    * se «despierta» el motor con una frase vacía en el mismo gesto.
    */
   /** Solo iPhone/iPad necesitan «despertar» el motor dentro del toque (en Android puede trabarlo). */
+  const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent)
   const isApple = typeof navigator !== 'undefined' &&
     (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1))
   function prime() {
@@ -77,7 +78,7 @@ export const useSpeech = defineStore('speech', () => {
     try {
       const u = new SpeechSynthesisUtterance(' ')
       u.volume = 0
-      synth.resume()
+      if (synth.paused) synth.resume()
       synth.speak(u)
     } catch { /* sin efecto */ }
   }
@@ -96,7 +97,8 @@ export const useSpeech = defineStore('speech', () => {
    */
   function utterance(text: string, level: number) {
     const u = new SpeechSynthesisUtterance(text)
-    if (level < 2) u.lang = voice.value?.lang ?? lang.value
+    // Android nombra los idiomas «es_US»; el estándar es «es-US»
+    if (level < 2) u.lang = (voice.value?.lang ?? lang.value).replace('_', '-')
     if (level < 1 && voice.value) u.voice = voice.value
     u.rate = prefs.value.rate
     return u
@@ -131,8 +133,9 @@ export const useSpeech = defineStore('speech', () => {
         if (my !== session || e.error === 'interrupted' || e.error === 'canceled') return
         fallback(e.error || 'error')
       }
-      // El motor puede haber quedado en pausa interna: se reactiva antes de hablar
-      synth.resume()
+      // Solo se reanuda si el motor está realmente en pausa: en Chrome para Android,
+      // resume() sin pausa previa puede hacer fallar la síntesis («synthesis-failed»)
+      if (synth.paused) synth.resume()
       synth.speak(u)
       log(`→ hablar v.${current.value.verse} · ${u.lang || 'idioma del teléfono'}${u.voice ? ` · ${u.voice.name}` : ''}`)
       // Si no empieza a hablar en unos segundos, se prueba con una configuración más simple
@@ -146,22 +149,28 @@ export const useSpeech = defineStore('speech', () => {
     else go()
     // Chrome de escritorio corta las voces en línea tras ~15 s: pausa/reanuda periódicamente
     if (keepAlive) clearInterval(keepAlive)
-    if (voice.value && !voice.value.localService) {
+    if (voice.value && !voice.value.localService && !isAndroid) {
       keepAlive = setInterval(() => { if (synth.speaking && !synth.paused) { synth.pause(); synth.resume() } }, 10_000)
     }
   }
 
   /** Prueba directa desde el diagnóstico (dentro del toque, sin cargar nada antes). */
-  function test(text: string) {
+  function test(text: string, minimal = false) {
     if (!synth) return log('✗ este navegador no tiene speechSynthesis')
-    if (synth.speaking || synth.pending) cancelNow()
+    const name = minimal ? 'prueba mínima' : 'prueba'
     const u = new SpeechSynthesisUtterance(text)
-    u.lang = lang.value
-    u.onstart = () => log('✓ prueba: el teléfono empezó a hablar')
-    u.onend = () => log('✓ prueba terminada')
-    u.onerror = (e) => log(`✗ prueba: ${e.error}`)
-    synth.resume()
-    setTimeout(() => { synth.speak(u); log(`→ prueba · ${u.lang}`) }, Math.max(0, 150 - (performance.now() - cancelledAt)))
+    if (!minimal) u.lang = lang.value
+    u.onstart = () => log(`✓ ${name}: el teléfono empezó a hablar`)
+    u.onend = () => log(`✓ ${name} terminada`)
+    u.onerror = (e) => log(`✗ ${name}: ${e.error}`)
+    if (minimal) {
+      // Lo mínimo posible: ni cancelar, ni reanudar, ni idioma, dentro del mismo toque
+      synth.speak(u)
+      log(`→ ${name} · speaking=${synth.speaking} pending=${synth.pending} paused=${synth.paused}`)
+      return
+    }
+    if (synth.speaking || synth.pending) cancelNow()
+    setTimeout(() => { synth.speak(u); log(`→ ${name} · ${u.lang}`) }, Math.max(0, 150 - (performance.now() - cancelledAt)))
   }
 
   async function advance() {

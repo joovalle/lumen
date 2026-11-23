@@ -73,6 +73,7 @@ export default {
     new: 'Novo', soon: 'Em breve', soonToast: 'Este recurso chegará em breve.',
   },
   listen: {
+    testMinimal: 'Teste mínimo',
     engineShort: 'O mecanismo de voz do celular não responde. Abra as opções (☰) para ver como resolver.',
     engineTitle: 'O celular recusou a leitura. Normalmente se resolve assim:',
     engineSteps: ['Configurações → Gerenciamento geral → Idioma e entrada → Saída de texto para fala.', 'Mecanismo preferido: «Serviços de fala do Google».', 'Na engrenagem ⚙: Instalar dados de voz → Português.', 'Toque em «Ouvir um exemplo»: se não soar ali, o problema é do celular.', 'Atualize «Serviços de fala do Google» na Play Store e reinicie o Chrome.'],
