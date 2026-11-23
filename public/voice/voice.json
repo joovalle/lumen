@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "voice": {
+    "id": "es-carlfm-x-low",
+    "lang": "es",
+    "name": "Carlos (español)",
+    "license": "Dominio público (dataset carlfm01/my-speech-datasets) · modelo Piper (MIT)",
+    "model": "voice/es-carlfm-x-low.onnx.gz",
+    "config": "voice/es-carlfm-x-low.onnx.json",
+    "sizes": {
+      "model": 18801792,
+      "data": 9067873
+    }
+  },
+  "data": "voice/piper_phonemize.data.gz"
+}

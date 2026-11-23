@@ -59,6 +59,7 @@ const values = [
         <li v-for="m in library.catalog ?? []" :key="m.id"><strong>{{ m.title }}</strong> — {{ m.license }}</li>
         <li><strong>OpenBible.info</strong> — Cross references (CC BY)</li>
         <li><strong>scrollmapper/bible_databases</strong> — fuentes de texto</li>
+        <li><strong>Voz de Lumen</strong> — Piper (MIT) · voz «carlfm» (dominio público) · ONNX Runtime (MIT) · eSpeak NG (GPL-3.0)</li>
         <li><strong>SQLite · sql.js · Vue</strong> — tecnología</li>
       </ul>
       <p class="version">{{ $t('about.version', { v: APP.version }) }}</p>

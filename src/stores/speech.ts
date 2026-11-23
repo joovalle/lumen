@@ -5,6 +5,7 @@ import { engine } from '@/core/engine/client'
 import { toPlainText } from '@/core/markup'
 import { nextChapter, type Passage } from '@/core/reference'
 import { i18n } from '@/i18n'
+import * as lumenVoice from '@/core/voice/lumenVoice'
 import { useLibrary } from './library'
 
 /**
@@ -18,7 +19,8 @@ const LANG_TAGS: Record<string, string> = { es: 'es', en: 'en', pt: 'pt' }
 
 export const useSpeech = defineStore('speech', () => {
   const synth = typeof window !== 'undefined' && 'speechSynthesis' in window ? window.speechSynthesis : null
-  const supported = !!synth
+  /** Se puede escuchar si hay voz del sistema o si el navegador puede usar la voz de Lumen. */
+  const supported = !!synth || typeof WebAssembly !== 'undefined'
   const state = ref<'idle' | 'loading' | 'playing' | 'paused'>('idle')
   const bibleId = ref<string | null>(null)
   const passage = ref<Passage | null>(null)
@@ -29,7 +31,37 @@ export const useSpeech = defineStore('speech', () => {
   /** Código exacto del último error del motor (p. ej. «synthesis-failed») */
   const errorCode = ref<string | null>(null)
   const voices = shallowRef<SpeechSynthesisVoice[]>([])
-  const prefs = useLocalStorage('lumen.speech', { rate: 1, voiceURI: '', autoNext: true, level: 0 }, { mergeDefaults: true })
+  const prefs = useLocalStorage('lumen.speech', { rate: 1, voiceURI: '', autoNext: true, level: 0, engine: 'system' as 'system' | 'lumen' }, { mergeDefaults: true })
+
+  // ——— Voz de Lumen (no depende del teléfono) ———
+  const lumenState = ref<'unknown' | 'absent' | 'installing' | 'installed'>('unknown')
+  const lumenProgress = ref(0)
+  const lumenSize = ref(0)
+  const lumenError = ref<string | null>(null)
+  async function checkLumen() {
+    if (lumenState.value === 'installing') return
+    lumenState.value = (await lumenVoice.isInstalled()) ? 'installed' : 'absent'
+    if (!lumenSize.value) lumenSize.value = await lumenVoice.downloadSize().catch(() => 0)
+  }
+  async function installLumen() {
+    lumenState.value = 'installing'
+    lumenError.value = null
+    lumenProgress.value = 0
+    try {
+      await lumenVoice.install((p) => (lumenProgress.value = p))
+      lumenState.value = 'installed'
+      prefs.value.engine = 'lumen'
+    } catch (e) {
+      lumenState.value = 'absent'
+      lumenError.value = e instanceof Error ? e.message : String(e)
+    }
+  }
+  async function removeLumen() {
+    stop()
+    await lumenVoice.remove()
+    prefs.value.engine = 'system'
+    lumenState.value = 'absent'
+  }
   let session = 0
   let keepAlive: ReturnType<typeof setInterval> | null = null
 
@@ -49,6 +81,9 @@ export const useSpeech = defineStore('speech', () => {
     return LANG_TAGS[rec?.language ?? ''] ?? (i18n.global.locale.value as string)
   })
   const voicesForLang = computed(() => voices.value.filter((v) => v.lang.toLowerCase().startsWith(lang.value)))
+  /** Se usa la voz de Lumen si está elegida, instalada y la versión es en español. */
+  const usingLumen = computed(() => prefs.value.engine === 'lumen' && lumenState.value === 'installed' && lang.value === 'es')
+
   const voice = computed(() =>
     voicesForLang.value.find((v) => v.voiceURI === prefs.value.voiceURI)
     ?? voicesForLang.value.find((v) => v.localService && v.default)
@@ -104,8 +139,66 @@ export const useSpeech = defineStore('speech', () => {
     return u
   }
 
+  let audio: HTMLAudioElement | null = null
+  const SILENT = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQAAAAA='
+  /** iPhone: el elemento de audio debe «estrenarse» dentro del toque. */
+  function unlockAudio() {
+    audio ??= new Audio()
+    if (!audio.src || audio.src === SILENT) {
+      audio.src = SILENT
+      audio.play().catch(() => undefined)
+    }
+  }
+  const prepared = new Map<number, Promise<string>>()
+  function clearPrepared() {
+    for (const p of prepared.values()) void p.then((u) => URL.revokeObjectURL(u)).catch(() => undefined)
+    prepared.clear()
+  }
+  function prepare(i: number): Promise<string> | undefined {
+    const v = verses.value[i]
+    if (!v) return undefined
+    let p = prepared.get(i)
+    if (!p) {
+      p = lumenVoice.synthesize(v.text, prefs.value.rate).then(({ pcm, sampleRate }) => URL.createObjectURL(lumenVoice.toWav(pcm, sampleRate)))
+      prepared.set(i, p)
+    }
+    return p
+  }
+
+  async function speakLumen() {
+    const my = ++session
+    const i = index.value
+    audio ??= new Audio()
+    try {
+      const url = await prepare(i)
+      if (!url || my !== session || state.value !== 'playing') return
+      audio.src = url
+      audio.onended = () => { if (my === session && state.value === 'playing') void advance() }
+      await audio.play()
+      log(`▶ voz de Lumen v.${current.value?.verse}`)
+      void prepare(i + 1) // el siguiente versículo se prepara mientras suena este
+      // Se liberan los audios ya escuchados
+      for (const k of [...prepared.keys()]) if (k < i - 1) { void prepared.get(k)!.then((u) => URL.revokeObjectURL(u)); prepared.delete(k) }
+    } catch (e) {
+      if (my !== session) return
+      const name = (e as Error).name
+      log(`✗ voz de Lumen: ${(e as Error).message}`)
+      state.value = 'paused'
+      error.value = name === 'NotAllowedError' ? 'blocked' : 'failed'
+      errorCode.value = name === 'NotAllowedError' ? null : 'lumen'
+    }
+  }
+
   function speakCurrent(level = prefs.value.level) {
-    if (!synth || !current.value) return
+    if (usingLumen.value) { void speakLumen(); return }
+    if (!current.value) return
+    if (!synth) {
+      // Sin voz del sistema: se ofrece la voz de Lumen
+      state.value = 'paused'
+      error.value = 'engine'
+      errorCode.value = 'sin speechSynthesis'
+      return
+    }
     const my = ++session
     // Android descarta lo que se pide justo después de cancel(): se espera un instante
     if (synth.speaking || synth.pending) cancelNow()
@@ -186,11 +279,14 @@ export const useSpeech = defineStore('speech', () => {
 
   /** Empieza a leer un capítulo desde un versículo. */
   async function start(id: string, book: number, chapter: number, fromVerse = 1) {
-    if (!synth) return
+    if (!synth && prefs.value.engine !== 'lumen') return
     prime()
+    if (prefs.value.engine === 'lumen') unlockAudio()
+    if (lumenState.value === 'unknown') await checkLumen()
+    clearPrepared()
     error.value = null
     const my = ++session
-    if (synth.speaking || synth.pending) cancelNow()
+    if (synth && (synth.speaking || synth.pending)) cancelNow()
     state.value = 'loading'
     const library = useLibrary()
     await library.ensureOpen(id)
@@ -207,6 +303,11 @@ export const useSpeech = defineStore('speech', () => {
   // Pausa = cancelar y recordar el versículo (pause() no es fiable en Android)
   function pause() {
     if (state.value !== 'playing') return
+    if (usingLumen.value && audio && !audio.paused) {
+      audio.pause()
+      state.value = 'paused'
+      return
+    }
     session++
     cancelNow()
     state.value = 'paused'
@@ -216,9 +317,15 @@ export const useSpeech = defineStore('speech', () => {
     prime()
     // Tras un fallo, al tocar ▶ se vuelve a intentar desde la configuración completa
     if (error.value === 'failed' || error.value === 'engine') prefs.value.level = 0
+    const wasError = !!error.value
     error.value = null
     errorCode.value = null
     state.value = 'playing'
+    // Voz de Lumen en pausa: se retoma el mismo audio
+    if (usingLumen.value && audio && audio.src && audio.src !== SILENT && audio.paused && !wasError) {
+      audio.play().catch(() => speakCurrent())
+      return
+    }
     speakCurrent()
   }
   function toggle() {
@@ -228,6 +335,8 @@ export const useSpeech = defineStore('speech', () => {
   function stop() {
     session++
     cancelNow()
+    audio?.pause()
+    clearPrepared()
     if (keepAlive) clearInterval(keepAlive)
     state.value = 'idle'
     passage.value = null
@@ -241,6 +350,7 @@ export const useSpeech = defineStore('speech', () => {
   }
   function setRate(rate: number) {
     prefs.value.rate = rate
+    clearPrepared()
     if (state.value === 'playing') speakCurrent()
   }
   function setVoice(uri: string) {
@@ -250,6 +360,7 @@ export const useSpeech = defineStore('speech', () => {
   }
 
   return {
+    usingLumen, lumenState, lumenProgress, lumenSize, lumenError, checkLumen, installLumen, removeLumen,
     supported, state, error, errorCode, diag, test, voices, bibleId, passage, verses, index, current, prefs, lang, voicesForLang, voice,
     start, pause, resume, toggle, stop, step, setRate, setVoice,
   }

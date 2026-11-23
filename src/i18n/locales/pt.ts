@@ -73,6 +73,7 @@ export default {
     new: 'Novo', soon: 'Em breve', soonToast: 'Este recurso chegará em breve.',
   },
   listen: {
+    engine: 'Mecanismo de voz', engineSystem: 'Do celular', engineLumen: 'Do Lumen', lumenOfferText: 'Seu celular não consegue ler em voz alta. O Lumen tem sua própria voz em espanhol.', lumenOffer: 'Baixar voz ({size})', lumenUse: 'Usar a voz do Lumen', lumenDownloading: 'Baixando a voz do Lumen… {p} %', lumenRemove: 'Remover a voz do Lumen', lumenOnlyEs: 'A voz do Lumen só fala espanhol por enquanto; com esta versão é usada a voz do celular.', lumenAbout: 'A voz do Lumen funciona em qualquer celular e sem internet depois de baixada (uma só vez). Voz em espanhol de domínio público.',
     testMinimal: 'Teste mínimo',
     engineShort: 'O mecanismo de voz do celular não responde. Abra as opções (☰) para ver como resolver.',
     engineTitle: 'O celular recusou a leitura. Normalmente se resolve assim:',

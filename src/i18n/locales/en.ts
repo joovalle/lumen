@@ -73,6 +73,7 @@ export default {
     new: 'New', soon: 'Soon', soonToast: 'This feature is coming soon.',
   },
   listen: {
+    engine: 'Voice engine', engineSystem: 'Phone', engineLumen: 'Lumen', lumenOfferText: 'Your phone cannot read aloud. Lumen has its own Spanish voice.', lumenOffer: 'Download voice ({size})', lumenUse: 'Use the Lumen voice', lumenDownloading: 'Downloading the Lumen voice… {p} %', lumenRemove: 'Remove the Lumen voice', lumenOnlyEs: 'The Lumen voice only speaks Spanish for now; this version uses the phone’s voice.', lumenAbout: 'The Lumen voice works on any phone and offline once downloaded (only once). Public-domain Spanish voice.',
     testMinimal: 'Minimal test',
     engineShort: 'The phone’s speech engine is not responding. Open the options (☰) to see how to fix it.',
     engineTitle: 'The phone refused to read aloud. This usually fixes it:',
