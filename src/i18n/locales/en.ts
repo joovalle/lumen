@@ -73,6 +73,9 @@ export default {
     new: 'New', soon: 'Soon', soonToast: 'This feature is coming soon.',
   },
   listen: {
+    engineShort: 'The phone’s speech engine is not responding. Open the options (☰) to see how to fix it.',
+    engineTitle: 'The phone refused to read aloud. This usually fixes it:',
+    engineSteps: ['Settings → General management → Language and input → Text-to-speech output.', 'Preferred engine: “Speech Services by Google”.', 'Tap its gear ⚙: Install voice data → your language.', 'Tap “Listen to an example”: if it is silent there, the issue is the phone.', 'Update “Speech Services by Google” in the Play Store and restart Chrome.'],
     diagnostics: 'Voice diagnostics', test: 'Test voice', testPhrase: 'Hello. This is a Lumen voice test.',
     tapToStart: 'Tap ▶ to start listening.', failed: 'The phone did not respond. Tap ▶ to retry; if it persists, check that a voice is installed (Settings → Text-to-speech).',
     listening: 'Listening', listenChapter: 'Listen to this chapter', play: 'Play', pause: 'Pause', stop: 'Stop',

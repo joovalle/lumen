@@ -73,7 +73,7 @@ function cycleRate() {
       </button>
       <button class="info" @click="open">
         <strong><Headphones /> {{ label }}</strong>
-        <span v-if="speech.error" class="err">{{ $t(speech.error === 'blocked' ? 'listen.tapToStart' : 'listen.failed') }}<template v-if="speech.errorCode"> ({{ speech.errorCode }})</template></span>
+        <span v-if="speech.error" class="err">{{ $t(speech.error === 'blocked' ? 'listen.tapToStart' : speech.error === 'engine' ? 'listen.engineShort' : 'listen.failed') }}<template v-if="speech.errorCode"> ({{ speech.errorCode }})</template></span>
         <span v-else>{{ abbr }}<template v-if="speech.current"> · {{ $t('listen.verse', { n: speech.current.verse }) }}</template></span>
       </button>
       <button class="ctl hide-xs" :aria-label="$t('listen.prev')" @click="speech.step(-1)"><SkipBack /></button>
@@ -93,6 +93,10 @@ function cycleRate() {
           <div class="steps">
             <button class="btn btn-sm" @click="speech.step(-1)"><SkipBack /> {{ $t('listen.prev') }}</button>
             <button class="btn btn-sm" @click="speech.step(1)">{{ $t('listen.next') }} <SkipForward /></button>
+          </div>
+          <div v-if="speech.error === 'engine'" class="help">
+            <strong>{{ $t('listen.engineTitle') }}</strong>
+            <ol><li v-for="(step, i) in ($tm('listen.engineSteps') as string[])" :key="i">{{ $rt(step) }}</li></ol>
           </div>
           <details class="diag">
             <summary><Stethoscope /> {{ $t('listen.diagnostics') }}</summary>
@@ -139,6 +143,9 @@ function cycleRate() {
 .auto { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 8px; border-top: 1px solid var(--border); margin-top: 6px; font-size: 14px; }
 .steps { display: flex; gap: 6px; padding: 4px; }
 .steps .btn { flex: 1; }
+.help { margin: 6px 4px; padding: 10px 12px; border-radius: 12px; background: rgba(185, 119, 14, 0.1); font-size: 12.5px; color: var(--text-2); }
+.help strong { display: block; color: var(--text); margin-bottom: 6px; }
+.help ol { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
 .diag { margin-top: 6px; border-top: 1px solid var(--border); padding-top: 6px; }
 .diag summary { display: flex; align-items: center; gap: 6px; padding: 6px 8px; font-size: 13px; font-weight: 600; color: var(--text-2); cursor: pointer; }
 .diag summary svg { width: 15px; height: 15px; }

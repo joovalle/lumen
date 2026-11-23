@@ -25,7 +25,7 @@ export const useSpeech = defineStore('speech', () => {
   const verses = shallowRef<{ verse: number; text: string }[]>([])
   const index = ref(0)
   /** Último problema al hablar: 'blocked' (el navegador pidió un toque) o 'failed' */
-  const error = ref<'blocked' | 'failed' | null>(null)
+  const error = ref<'blocked' | 'failed' | 'engine' | null>(null)
   /** Código exacto del último error del motor (p. ej. «synthesis-failed») */
   const errorCode = ref<string | null>(null)
   const voices = shallowRef<SpeechSynthesisVoice[]>([])
@@ -116,7 +116,8 @@ export const useSpeech = defineStore('speech', () => {
         speakCurrent(level + 1)
       } else {
         state.value = 'paused'
-        error.value = why === 'not-allowed' ? 'blocked' : 'failed'
+        // «synthesis-failed» en todos los niveles = el motor de voz del sistema rechaza hablar
+        error.value = why === 'not-allowed' ? 'blocked' : why === 'synthesis-failed' ? 'engine' : 'failed'
         errorCode.value = why
       }
     }
@@ -205,7 +206,7 @@ export const useSpeech = defineStore('speech', () => {
     if (state.value !== 'paused') return
     prime()
     // Tras un fallo, al tocar ▶ se vuelve a intentar desde la configuración completa
-    if (error.value === 'failed') prefs.value.level = 0
+    if (error.value === 'failed' || error.value === 'engine') prefs.value.level = 0
     error.value = null
     errorCode.value = null
     state.value = 'playing'

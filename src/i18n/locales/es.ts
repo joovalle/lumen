@@ -71,6 +71,9 @@ export default {
     new: 'Nuevo', soon: 'Pronto', soonToast: 'Esta función llegará pronto.',
   },
   listen: {
+    engineShort: 'El motor de voz del teléfono no responde. Abre las opciones (☰) para ver cómo arreglarlo.',
+    engineTitle: 'El teléfono rechazó la lectura. Suele arreglarse así:',
+    engineSteps: ['Ajustes → Administración general → Idioma y entrada → Salida de texto a voz.', 'Motor preferido: «Servicios de voz de Google».', 'En su engranaje ⚙: Instalar datos de voz → Español.', 'Toca «Escuchar un ejemplo»: si ahí no suena, el problema es del teléfono.', 'Actualiza «Servicios de voz de Google» en Play Store y reinicia Chrome.'],
     diagnostics: 'Diagnóstico de voz', test: 'Probar voz', testPhrase: 'Hola. Esta es una prueba de voz de Lumen.',
     tapToStart: 'Toca ▶ para empezar a escuchar.', failed: 'El teléfono no respondió. Toca ▶ para reintentar; si sigue igual, revisa que tenga una voz instalada (Ajustes → Texto a voz).',
     listening: 'Escuchando', listenChapter: 'Escuchar este capítulo', play: 'Reproducir', pause: 'Pausa', stop: 'Detener',
