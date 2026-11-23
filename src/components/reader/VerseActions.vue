@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Bookmark, BookmarkCheck, Copy, Eraser, GitCompare, Headphones, Image as ImageIcon, Link2, Share2, StickyNote, X } from 'lucide-vue-next'
 import { useSpeech } from '@/stores/speech'
+import { APP } from '@/config'
 import { passageText } from '@/composables/passageText'
 import { openShareStudio } from '@/composables/shareStudio'
 import { passageUrl } from '@/composables/links'
@@ -98,7 +99,7 @@ async function bookmark() {
         </div>
         <span class="sep" />
         <button class="act" @click="makeImage"><ImageIcon /><span>{{ $t('selection.image') }}</span></button>
-        <button class="act" @click="listenFrom"><Headphones /><span>{{ $t('more.listen') }}</span></button>
+        <button v-if="APP.features.listen" class="act" @click="listenFrom"><Headphones /><span>{{ $t('more.listen') }}</span></button>
         <button class="act" @click="reader.openStudy('notes')"><StickyNote /><span>{{ $t('selection.note') }}</span></button>
         <button class="act" @click="reader.openStudy('refs')"><Link2 /><span>{{ $t('selection.refs') }}</span></button>
         <button class="act" @click="reader.openStudy('compare')"><GitCompare /><span>{{ $t('selection.compare') }}</span></button>

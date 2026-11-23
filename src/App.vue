@@ -4,6 +4,7 @@ import CommandPalette from '@/components/shell/CommandPalette.vue'
 import ToastHost from '@/components/shell/ToastHost.vue'
 import VerseImageStudio from '@/components/share/VerseImageStudio.vue'
 import MiniPlayer from '@/components/shell/MiniPlayer.vue'
+import { APP } from '@/config'
 </script>
 
 <template>
@@ -14,7 +15,7 @@ import MiniPlayer from '@/components/shell/MiniPlayer.vue'
     </div>
     <CommandPalette />
     <VerseImageStudio />
-    <MiniPlayer />
+    <MiniPlayer v-if="APP.features.listen" />
     <ToastHost />
   </div>
 </template>

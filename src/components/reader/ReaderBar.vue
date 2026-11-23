@@ -3,6 +3,7 @@ import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Check, ChevronDown, ChevronLeft, ChevronRight, Columns2, Download, Headphones, LoaderCircle, Minus, PanelRight, Plus, Search, Type } from 'lucide-vue-next'
 import { useSpeech } from '@/stores/speech'
+import { APP } from '@/config'
 import { toast } from '@/composables/toast'
 import type { CatalogEntry } from '@/stores/library'
 import PopMenu from '@/components/common/PopMenu.vue'
@@ -172,7 +173,7 @@ const size = (d: number) => (prefs.value.fontSize = Math.min(30, Math.max(14, pr
         </div>
       </PopMenu>
 
-      <button class="icon-btn" :class="{ active: listeningHere }" :title="$t('listen.listenChapter')" :aria-label="$t('listen.listenChapter')" @click="listen"><Headphones /></button>
+      <button v-if="APP.features.listen" class="icon-btn" :class="{ active: listeningHere }" :title="$t('listen.listenChapter')" :aria-label="$t('listen.listenChapter')" @click="listen"><Headphones /></button>
       <button class="icon-btn hide-sm" :title="$t('nav.search') + ' (Ctrl K)'" @click="reader.paletteOpen = true"><Search /></button>
       <button class="icon-btn" :class="{ active: prefs.studyOpen }" :title="$t('reader.study')" :aria-pressed="prefs.studyOpen" @click="prefs.studyOpen = !prefs.studyOpen">
         <PanelRight />

@@ -7,6 +7,7 @@ import { donationLinks } from '@/composables/platform'
 import { toast } from '@/composables/toast'
 import { useSettings } from '@/stores/settings'
 import { useSpeech } from '@/stores/speech'
+import { APP } from '@/config'
 
 defineProps<{ open: boolean }>()
 const emit = defineEmits<{ close: [] }>()
@@ -32,7 +33,7 @@ const tiles: Tile[] = [
   { id: 'devotional', icon: Sparkles, label: 'nav.devotional', run: go('/devotional') },
   { id: 'plans', icon: CalendarCheck, label: 'nav.plans', run: go('/plans') },
   { id: 'library', icon: Library, label: 'nav.library', run: go('/library') },
-  { id: 'listen', icon: Headphones, label: 'more.listen', badge: 'new', run: listen },
+  ...(APP.features.listen ? [{ id: 'listen', icon: Headphones, label: 'more.listen', badge: 'new' as const, run: listen }] : []),
   { id: 'live', icon: Users, label: 'more.live', badge: 'soon', run: soon },
   { id: 'maps', icon: Map, label: 'more.maps', badge: 'soon', run: soon },
   { id: 'interlinear', icon: Languages, label: 'more.interlinear', badge: 'soon', run: soon },

@@ -17,4 +17,9 @@ export const APP = {
    */
   donationsInStoreApps: false,
   contactEmail: '',
+  /** Funciones que se pueden encender o apagar sin borrar su código. */
+  features: {
+    /** «Escuchar» (lectura en voz alta). En pausa por ahora; se retomará más adelante. */
+    listen: false,
+  },
 }
