@@ -116,7 +116,7 @@ function rtfToHtml(src: string): string {
     if ('br' in seg) { html += '<br>'; continue }
     const { text, state: s } = seg
     if (s.sup && STRONG_RE.test(text.trim())) { html += strongTag(text.trim()); continue }
-    let piece = escapeHtml(text)
+    let piece = escapeHtml(decodeEntities(text))
     if (s.sup) piece = `<sup>${piece}</sup>`
     if (s.sub) piece = `<sub>${piece}</sub>`
     if (s.u) piece = `<u>${piece}</u>`
@@ -151,7 +151,7 @@ function gbfToHtml(src: string): string {
       else if (t === 'TS') out += '<span class="title">'
       else if (t === 'Ts') out += '</span>'
       else if (t === 'CM' || t === 'CL' || t.startsWith('P')) out += '<br>'
-    } else if (m[4]) out += escapeHtml(m[4])
+    } else if (m[4]) out += escapeHtml(decodeEntities(m[4]))
   }
   if (inNote) out += '</span>'
   return out
@@ -164,14 +164,36 @@ const ALLOWED_TAGS = new Set([
 const VOID_TAGS = new Set(['br', 'hr'])
 const DROP_CONTENT = new Set(['script', 'style', 'iframe', 'object', 'embed', 'template', 'svg', 'math', 'head', 'title'])
 
-const ENTITIES: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ' }
+// Entidades HTML con nombre (las de HTML 4): muchos módulos escriben «&iexcl;», «&aacute;», «&mdash;»…
+const LATIN1 = ('nbsp iexcl cent pound curren yen brvbar sect uml copy ordf laquo not shy reg macr deg plusmn sup2 sup3 acute ' +
+  'micro para middot cedil sup1 ordm raquo frac14 frac12 frac34 iquest Agrave Aacute Acirc Atilde Auml Aring AElig Ccedil Egrave ' +
+  'Eacute Ecirc Euml Igrave Iacute Icirc Iuml ETH Ntilde Ograve Oacute Ocirc Otilde Ouml times Oslash Ugrave Uacute Ucirc Uuml ' +
+  'Yacute THORN szlig agrave aacute acirc atilde auml aring aelig ccedil egrave eacute ecirc euml igrave iacute icirc iuml eth ' +
+  'ntilde ograve oacute ocirc otilde ouml divide oslash ugrave uacute ucirc uuml yacute thorn yuml').split(' ')
+const GREEK = 'Alpha Beta Gamma Delta Epsilon Zeta Eta Theta Iota Kappa Lambda Mu Nu Xi Omicron Pi Rho _ Sigma Tau Upsilon Phi Chi Psi Omega'.split(' ')
+const ENTITIES: Record<string, string> = {
+  amp: '&', lt: '<', gt: '>', quot: '"', apos: "'",
+  OElig: 'Œ', oelig: 'œ', Scaron: 'Š', scaron: 'š', Yuml: 'Ÿ', fnof: 'ƒ', circ: 'ˆ', tilde: '˜', sigmaf: 'ς',
+  ensp: ' ', emsp: ' ', thinsp: ' ', zwnj: '‌', zwj: '‍', lrm: '‎', rlm: '‏',
+  ndash: '–', mdash: '—', lsquo: '‘', rsquo: '’', sbquo: '‚', ldquo: '“', rdquo: '”', bdquo: '„', dagger: '†', Dagger: '‡',
+  bull: '•', hellip: '…', permil: '‰', prime: '′', Prime: '″', lsaquo: '‹', rsaquo: '›', oline: '‾', frasl: '⁄', euro: '€',
+  trade: '™', larr: '←', uarr: '↑', rarr: '→', darr: '↓', harr: '↔',
+}
+LATIN1.forEach((n, i) => { ENTITIES[n] = String.fromCharCode(160 + i) })
+GREEK.forEach((n, i) => {
+  if (n === '_') return
+  ENTITIES[n] = String.fromCharCode(913 + i)
+  ENTITIES[n.toLowerCase()] = String.fromCharCode(945 + i)
+})
+ENTITIES.nbsp = ' ' // espacio normal: así el texto fluye y se puede buscar
+
 export const decodeEntities = (s: string) =>
-  s.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (all, e: string) => {
+  s.replace(/&(#x[0-9a-f]+|#\d+|[a-z][a-z0-9]*);/gi, (all, e: string) => {
     if (e[0] === '#') {
       const code = e[1] === 'x' || e[1] === 'X' ? parseInt(e.slice(2), 16) : Number(e.slice(1))
       return Number.isFinite(code) && code > 0 && code < 0x110000 ? String.fromCodePoint(code) : ''
     }
-    return ENTITIES[e.toLowerCase()] ?? all
+    return ENTITIES[e] ?? ENTITIES[e.toLowerCase()] ?? all
   })
 
 function sanitizeHtml(src: string): string {
@@ -215,7 +237,7 @@ export function toSafeHtml(raw: string | null | undefined): string {
   if (looksLikeGbf(raw)) return gbfToHtml(raw)
   if (looksLikeRtf(raw)) return rtfToHtml(raw)
   if (looksLikeHtml(raw)) return sanitizeHtml(raw)
-  return escapeHtml(raw)
+  return escapeHtml(decodeEntities(raw))
 }
 
 /** Texto plano (para búsquedas, copiar y vistas previas). Omite los números Strong. */

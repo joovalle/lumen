@@ -39,3 +39,22 @@ describe('toPlainText', () => {
     expect(toPlainText('<p>A &amp; B</p>')).toBe('A & B')
   })
 })
+
+describe('entidades HTML de los módulos', () => {
+  it('convierte entidades con nombre en texto sin formato (p. ej. NTV de e-Sword)', () => {
+    const raw = 'Señor, a lo largo de todas las generaciones, &iexcl;tú has sido nuestro hogar!'
+    expect(toSafeHtml(raw)).toBe('Señor, a lo largo de todas las generaciones, ¡tú has sido nuestro hogar!')
+    expect(toPlainText(raw)).toBe('Señor, a lo largo de todas las generaciones, ¡tú has sido nuestro hogar!')
+    expect(toPlainText('&iquest;Qui&eacute;n? &mdash;dijo&hellip; &laquo;S&iacute;&raquo; &Ntilde;')).toBe('¿Quién? —dijo… «Sí» Ñ')
+  })
+  it('también dentro de HTML, RTF y GBF', () => {
+    expect(toSafeHtml('<i>&iexcl;Aleluya!</i>')).toBe('<i>¡Aleluya!</i>')
+    expect(toSafeHtml('{\\b &iexcl;Gloria!}')).toBe('<b>¡Gloria!</b>')
+    expect(toPlainText('&iexcl;Dios<WH430> es bueno!')).toBe('¡Dios es bueno!')
+    expect(toSafeHtml('&alpha;&Omega; &sigmaf;')).toBe('αΩ ς')
+  })
+  it('no convierte en etiquetas lo que era texto escapado', () => {
+    expect(toSafeHtml('a &lt;b&gt; c')).toBe('a &lt;b&gt; c')
+    expect(toSafeHtml('&desconocida; queda igual')).toBe('&amp;desconocida; queda igual')
+  })
+})
