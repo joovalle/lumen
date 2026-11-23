@@ -10,5 +10,11 @@ export const APP = {
   repoUrl: 'https://github.com/joovalle/lumen',
   /** p. ej. [{ label: 'Ko-fi', url: 'https://ko-fi.com/…' }, { label: 'PayPal', url: '…' }] */
   donations: [] as { label: string; url: string }[],
+  /**
+   * Apple y Google no permiten enlaces de pago externos dentro de las apps de sus
+   * tiendas (salvo organizaciones sin fines de lucro reconocidas). Con «false», las
+   * donaciones solo se muestran en la versión web.
+   */
+  donationsInStoreApps: false,
   contactEmail: '',
 }

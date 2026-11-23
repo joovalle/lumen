@@ -59,9 +59,12 @@ export default {
     },
   },
   devotional: {
+    version: 'Leer en', whatIs: '¿Qué es «Luz diaria» y cómo se lee?', themeMorning: 'Tema de esta mañana', themeEvening: 'Tema de esta noche',
+    explain1: 'Es un devocional clásico, publicado en 1875 y leído por generaciones de cristianos. No contiene opiniones ni comentarios: cada mañana y cada noche propone un tema con un versículo central, y luego lo acompaña con otros pasajes de toda la Biblia que hablan de lo mismo. Es la Escritura explicando la Escritura.',
+    explain2: 'Léelo despacio, de principio a fin, como una meditación. El texto aparece en tu versión principal; puedes cambiarla arriba. Toca cualquier referencia para leer el pasaje en su contexto.',
     title: 'Luz diaria', morning: 'Mañana', evening: 'Noche', read: 'Leer el devocional', count: '{n} pasajes',
     prevDay: 'Día anterior', nextDay: 'Día siguiente', shareImage: 'Crear imagen', copyAll: 'Copiar devocional',
-    credit: 'Selección de pasajes de «Daily Light on the Daily Path» (familia Bagster, 1875), obra de dominio público. Las referencias se verificaron una por una; el texto bíblico es el de tu versión ({version}).',
+    credit: 'Basado en «Luz diaria» (Daily Light on the Daily Path), de la familia Bagster, 1875. Obra de dominio público.',
   },
   colors: { gold: 'Oro', mint: 'Menta', sky: 'Cielo', lilac: 'Lila', rose: 'Rosa' },
   picker: {

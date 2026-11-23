@@ -3,9 +3,12 @@ import { onMounted } from 'vue'
 import { Code, Gift, HandHeart, Lock, WifiOff, Layers } from 'lucide-vue-next'
 import LumenLogo from '@/components/common/LumenLogo.vue'
 import { APP } from '@/config'
+import { donationLinks, isStoreApp } from '@/composables/platform'
 import { useLibrary } from '@/stores/library'
 
 const library = useLibrary()
+const donations = donationLinks()
+const storeApp = isStoreApp()
 onMounted(() => void library.fetchCatalog())
 const values = [
   { icon: Gift, title: 'about.values.free', text: 'about.values.freeText' },
@@ -38,12 +41,12 @@ const values = [
       </article>
     </div>
 
-    <section class="section support card">
+    <section v-if="!storeApp || donations.length" id="support" class="section support card">
       <HandHeart class="heart" />
       <h2>{{ $t('about.support') }}</h2>
       <p>{{ $t('about.supportText') }}</p>
-      <div v-if="APP.donations.length" class="links">
-        <a v-for="d in APP.donations" :key="d.url" :href="d.url" target="_blank" rel="noopener" class="btn btn-primary">{{ d.label }}</a>
+      <div v-if="donations.length" class="links">
+        <a v-for="d in donations" :key="d.url" :href="d.url" target="_blank" rel="noopener" class="btn btn-primary">{{ d.label }}</a>
       </div>
       <p v-else class="soon">{{ $t('about.donationsSoon') }}</p>
       <p class="contribute">{{ $t('about.contribute') }}</p>

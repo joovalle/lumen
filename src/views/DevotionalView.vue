@@ -2,7 +2,8 @@
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { ChevronLeft, ChevronRight, Copy, Image as ImageIcon, Moon, Sun } from 'lucide-vue-next'
+import { BookOpen, Check, ChevronDown, ChevronLeft, ChevronRight, Copy, Image as ImageIcon, Moon, Sun } from 'lucide-vue-next'
+import PopMenu from '@/components/common/PopMenu.vue'
 import { bookByNumber } from '@/core/canon'
 import { periodFor, type Period, type Segment } from '@/core/devotional'
 import { isoDate, parseIso } from '@/core/plans'
@@ -30,6 +31,11 @@ const dateLabel = computed(() => {
   return s.charAt(0).toUpperCase() + s.slice(1)
 })
 const abbr = computed(() => library.get(settings.prefs.bibles[0])?.info.abbreviation ?? '')
+
+/** Cambia la versión principal (la misma que se usa al leer). */
+function useVersion(id: string) {
+  settings.prefs.bibles = [id, ...settings.prefs.bibles.filter((b) => b !== id)]
+}
 
 function go(days: number, p = period.value) {
   const d = new Date(date.value.getFullYear(), date.value.getMonth(), date.value.getDate() + days)
@@ -66,13 +72,32 @@ async function copyAll() {
           <button :class="{ active: period === 'm' }" @click="go(0, 'm')"><Sun /> {{ $t('devotional.morning') }}</button>
           <button :class="{ active: period === 'e' }" @click="go(0, 'e')"><Moon /> {{ $t('devotional.evening') }}</button>
         </div>
+        <PopMenu width="280px" align="start">
+          <template #trigger="{ toggle }">
+            <button class="chip version" @click="toggle"><BookOpen /> {{ abbr }} <ChevronDown /></button>
+          </template>
+          <template #default="{ close }">
+            <p class="menu-label">{{ $t('devotional.version') }}</p>
+            <button v-for="b in library.bibles" :key="b.id" class="menu-item" @click="useVersion(b.id); close()">
+              <span class="abbr">{{ b.info.abbreviation }}</span><span class="title">{{ b.info.title }}</span>
+              <Check v-if="settings.prefs.bibles[0] === b.id" class="tick" />
+            </button>
+          </template>
+        </PopMenu>
         <button v-if="!isToday" class="btn btn-ghost btn-sm" @click="router.replace({ query: {} })">{{ $t('nav.today') }}</button>
       </div>
     </header>
 
+    <details class="about-devo">
+      <summary>{{ $t('devotional.whatIs') }}</summary>
+      <p>{{ $t('devotional.explain1') }}</p>
+      <p>{{ $t('devotional.explain2') }}</p>
+    </details>
+
     <article class="reading" :class="{ loading }">
       <template v-if="theme">
         <blockquote class="theme">
+          <span class="eyebrow tlabel">{{ $t(period === 'm' ? 'devotional.themeMorning' : 'devotional.themeEvening') }}</span>
           <p>{{ tidyText(theme.text) }}</p>
           <button class="ref" @click="open(theme.segs)">{{ theme.label }}</button>
         </blockquote>
@@ -90,7 +115,7 @@ async function copyAll() {
       <div v-else class="skeleton" aria-hidden="true"><i /><i /><i /><i /></div>
     </article>
 
-    <p class="credit">{{ $t('devotional.credit', { version: abbr }) }}</p>
+    <p class="credit">{{ $t('devotional.credit') }}</p>
   </div>
 </template>
 
@@ -103,7 +128,19 @@ async function copyAll() {
 .row { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
 .segmented button { display: inline-flex; align-items: center; gap: 6px; }
 .segmented svg { width: 15px; height: 15px; }
-.reading { margin-top: 34px; transition: opacity var(--dur) var(--ease); }
+.chip.version { cursor: pointer; height: 36px; gap: 6px; font-weight: 650; }
+.chip.version svg { width: 15px; height: 15px; }
+.menu-label { padding: 6px 10px 8px; font-size: 12px; font-weight: 600; color: var(--text-3); }
+.menu-item { display: grid; grid-template-columns: 70px 1fr 18px; align-items: center; gap: 8px; width: 100%; padding: 10px; border: 0; border-radius: 10px; background: transparent; text-align: left; }
+.menu-item:hover { background: var(--surface); }
+.menu-item .abbr { font-weight: 700; font-size: 13px; color: var(--accent); }
+.menu-item .title { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.menu-item .tick { width: 16px; height: 16px; color: var(--accent); }
+.about-devo { margin: 22px auto 0; max-width: 560px; padding: 12px 16px; border-radius: 14px; background: var(--surface); font-size: 14.5px; color: var(--text-2); }
+.about-devo summary { cursor: pointer; font-weight: 650; color: var(--text); text-align: center; }
+.about-devo p { margin-top: 10px; line-height: 1.6; }
+.tlabel { display: block; margin-bottom: 12px; color: var(--accent); }
+.reading { margin-top: 26px; transition: opacity var(--dur) var(--ease); }
 .reading.loading { opacity: 0.55; }
 .theme {
   margin: 0 0 30px; padding: 30px 34px; border-radius: var(--radius-xl); text-align: center;

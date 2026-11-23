@@ -57,7 +57,7 @@ async function clearAll() {
     <nav class="links card">
       <RouterLink to="/plans" class="link"><CalendarCheck /><span>{{ $t('nav.plans') }}</span><ChevronRight class="chev" /></RouterLink>
       <RouterLink to="/library" class="link"><Library /><span>{{ $t('nav.library') }}</span><ChevronRight class="chev" /></RouterLink>
-      <RouterLink to="/about" class="link"><HandHeart /><span>{{ $t('nav.about') }}</span><ChevronRight class="chev" /></RouterLink>
+      <RouterLink to="/about" class="link"><HandHeart /><span>{{ $t('nav.about') }} · {{ $t('about.support') }}</span><ChevronRight class="chev" /></RouterLink>
     </nav>
 
     <section class="section">

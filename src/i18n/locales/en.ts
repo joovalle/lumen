@@ -61,9 +61,12 @@ export default {
     },
   },
   devotional: {
+    version: 'Read in', whatIs: 'What is “Daily Light” and how do I read it?', themeMorning: 'This morning’s theme', themeEvening: 'This evening’s theme',
+    explain1: 'A classic devotional first published in 1875 and read by generations of Christians. It has no opinions or commentary: each morning and evening it sets a theme with a key verse, then gathers other passages from across the Bible on the same subject. It is Scripture explaining Scripture.',
+    explain2: 'Read it slowly, from start to finish, as a meditation. The text appears in your main version; you can change it above. Tap any reference to read the passage in context.',
     title: 'Daily Light', morning: 'Morning', evening: 'Evening', read: 'Read the devotional', count: '{n} passages',
     prevDay: 'Previous day', nextDay: 'Next day', shareImage: 'Create image', copyAll: 'Copy devotional',
-    credit: 'Passages selected from “Daily Light on the Daily Path” (Bagster family, 1875), a public-domain work. Every reference was verified; the Bible text is from your version ({version}).',
+    credit: 'Based on “Daily Light on the Daily Path” by the Bagster family, 1875. Public domain.',
   },
   colors: { gold: 'Gold', mint: 'Mint', sky: 'Sky', lilac: 'Lilac', rose: 'Rose' },
   picker: {
