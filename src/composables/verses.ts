@@ -1,17 +1,22 @@
 import { verseKey } from '@/core/reference'
 import { useAnnotations } from '@/stores/annotations'
 import { useReader } from '@/stores/reader'
+import { useSpeech } from '@/stores/speech'
 
 /** Interacción común con versículos (selección, subrayados, Strong). */
 export function useVerseInteractions() {
   const reader = useReader()
   const notes = useAnnotations()
+  const speech = useSpeech()
+  const speaking = (v: number) =>
+    speech.state !== 'idle' && speech.current?.verse === v &&
+    speech.passage?.book === reader.passage.book && speech.passage?.chapter === reader.passage.chapter
 
   const key = (v: number) => verseKey(reader.passage.book, reader.passage.chapter, v)
 
   function classes(v: number) {
     const hl = notes.highlights.get(key(v))
-    return [hl ? `hl hl-${hl}` : '', { selected: reader.selection.includes(v) }]
+    return [hl ? `hl hl-${hl}` : '', { selected: reader.selection.includes(v), speaking: speaking(v) }]
   }
 
   function onClick(v: number, e: MouseEvent) {

@@ -17,6 +17,7 @@ import { useChapters } from '@/composables/chapter'
 import { useLibrary } from '@/stores/library'
 import { useReader } from '@/stores/reader'
 import { useSettings } from '@/stores/settings'
+import { useSpeech } from '@/stores/speech'
 
 const route = useRoute()
 const router = useRouter()
@@ -25,6 +26,16 @@ const library = useLibrary()
 const settings = useSettings()
 
 const flash = ref<number[]>([])
+const speech = useSpeech()
+
+// Mientras se escucha, el versículo que suena se mantiene a la vista
+watch(() => speech.current?.verse, (v) => {
+  if (!v || speech.passage?.book !== reader.passage.book || speech.passage?.chapter !== reader.passage.chapter) return
+  const el = document.getElementById(`v${v}`)
+  if (!el) return
+  const r = el.getBoundingClientRect()
+  if (r.top < 90 || r.bottom > window.innerHeight * 0.62) el.scrollIntoView({ block: 'center', behavior: 'smooth' })
+})
 const content = ref<HTMLElement>()
 
 /** Pasaje según la URL: /read/John/3?v=16 */

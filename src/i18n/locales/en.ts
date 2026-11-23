@@ -2,7 +2,7 @@ import type es from './es'
 
 export default {
   app: { tagline: 'The Word, with excellence' },
-  nav: { today: 'Today', read: 'Read', plans: 'Plans', search: 'Search', library: 'Library', notes: 'Notes', settings: 'Settings', about: 'About' },
+  nav: { today: 'Today', read: 'Read', devotional: 'Devotional', more: 'More', plans: 'Plans', search: 'Search', library: 'Library', notes: 'Notes', settings: 'Settings', about: 'About' },
   common: {
     close: 'Close', cancel: 'Cancel', save: 'Save', delete: 'Delete', back: 'Back', download: 'Download',
     installed: 'Installed', loading: 'Loading…', retry: 'Retry', more: 'Show more', copy: 'Copy', share: 'Share',
@@ -67,6 +67,16 @@ export default {
     title: 'Daily Light', morning: 'Morning', evening: 'Evening', read: 'Read the devotional', count: '{n} passages',
     prevDay: 'Previous day', nextDay: 'Next day', shareImage: 'Create image', copyAll: 'Copy devotional',
     credit: 'Based on “Daily Light on the Daily Path” by the Bagster family, 1875. Public domain.',
+  },
+  more: {
+    listen: 'Listen', live: 'Live room', maps: 'Maps', interlinear: 'Interlinear', donate: 'Donate',
+    new: 'New', soon: 'Soon', soonToast: 'This feature is coming soon.',
+  },
+  listen: {
+    listening: 'Listening', listenChapter: 'Listen to this chapter', play: 'Play', pause: 'Pause', stop: 'Stop',
+    prev: 'Previous', next: 'Next', speed: 'Speed', settings: 'Reading options', voice: 'Voice', verse: 'v. {n}',
+    autoNext: 'Continue with the next chapter', noVoice: 'This device has no voice installed for this language; the default voice will be used.',
+    noSupport: 'This browser cannot read aloud. Try an up-to-date Chrome or Safari.',
   },
   colors: { gold: 'Gold', mint: 'Mint', sky: 'Sky', lilac: 'Lilac', rose: 'Rose' },
   picker: {

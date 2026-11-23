@@ -104,4 +104,5 @@ const lookup = computed(() => props.columns.map((c) => new Map(c.rows.map((r, i)
   .two .cell { display: block; }
   .two .cell-label { display: none; }
 }
+.verse.speaking { box-shadow: inset 0 -0.12em 0 var(--accent); background-color: var(--accent-soft); }
 </style>

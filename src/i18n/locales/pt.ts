@@ -2,7 +2,7 @@ import type es from './es'
 
 export default {
   app: { tagline: 'A Palavra, com excelência' },
-  nav: { today: 'Hoje', read: 'Ler', plans: 'Planos', search: 'Buscar', library: 'Biblioteca', notes: 'Notas', settings: 'Ajustes', about: 'Sobre' },
+  nav: { today: 'Hoje', read: 'Ler', devotional: 'Devocional', more: 'Mais', plans: 'Planos', search: 'Buscar', library: 'Biblioteca', notes: 'Notas', settings: 'Ajustes', about: 'Sobre' },
   common: {
     close: 'Fechar', cancel: 'Cancelar', save: 'Salvar', delete: 'Excluir', back: 'Voltar', download: 'Baixar',
     installed: 'Instalado', loading: 'Carregando…', retry: 'Tentar de novo', more: 'Ver mais', copy: 'Copiar', share: 'Compartilhar',
@@ -67,6 +67,16 @@ export default {
     title: 'Luz diária', morning: 'Manhã', evening: 'Noite', read: 'Ler o devocional', count: '{n} passagens',
     prevDay: 'Dia anterior', nextDay: 'Próximo dia', shareImage: 'Criar imagem', copyAll: 'Copiar devocional',
     credit: 'Baseado em «Daily Light on the Daily Path», da família Bagster, 1875. Obra de domínio público.',
+  },
+  more: {
+    listen: 'Ouvir', live: 'Sala ao vivo', maps: 'Mapas', interlinear: 'Interlinear', donate: 'Doar',
+    new: 'Novo', soon: 'Em breve', soonToast: 'Este recurso chegará em breve.',
+  },
+  listen: {
+    listening: 'Ouvindo', listenChapter: 'Ouvir este capítulo', play: 'Reproduzir', pause: 'Pausar', stop: 'Parar',
+    prev: 'Anterior', next: 'Próximo', speed: 'Velocidade', settings: 'Opções de leitura', voice: 'Voz', verse: 'v. {n}',
+    autoNext: 'Continuar com o próximo capítulo', noVoice: 'Este aparelho não tem uma voz instalada para este idioma; será usada a voz padrão.',
+    noSupport: 'Este navegador não consegue ler em voz alta. Tente o Chrome ou o Safari atualizados.',
   },
   colors: { gold: 'Ouro', mint: 'Menta', sky: 'Céu', lilac: 'Lilás', rose: 'Rosa' },
   picker: {

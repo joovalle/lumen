@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Check, ChevronDown, ChevronLeft, ChevronRight, Columns2, Download, LoaderCircle, Minus, PanelRight, Plus, Search, Type } from 'lucide-vue-next'
+import { Check, ChevronDown, ChevronLeft, ChevronRight, Columns2, Download, Headphones, LoaderCircle, Minus, PanelRight, Plus, Search, Type } from 'lucide-vue-next'
+import { useSpeech } from '@/stores/speech'
 import { toast } from '@/composables/toast'
 import type { CatalogEntry } from '@/stores/library'
 import PopMenu from '@/components/common/PopMenu.vue'
@@ -21,6 +22,16 @@ const prefs = computed(() => settings.prefs)
 const prev = computed(() => prevChapter(reader.passage))
 const next = computed(() => nextChapter(reader.passage))
 const MAX_PARALLEL = 4
+const speech = useSpeech()
+const listeningHere = computed(() =>
+  speech.state !== 'idle' && speech.passage?.book === reader.passage.book && speech.passage?.chapter === reader.passage.chapter,
+)
+/** Escuchar este capítulo desde el versículo seleccionado (o desde el principio). */
+function listen() {
+  if (!speech.supported) return toast(t('listen.noSupport'), 'error')
+  if (listeningHere.value) return speech.toggle()
+  void speech.start(prefs.value.bibles[0], reader.passage.book, reader.passage.chapter, reader.focus ?? 1)
+}
 const { t } = useI18n()
 
 onMounted(() => void library.fetchCatalog())
@@ -161,6 +172,7 @@ const size = (d: number) => (prefs.value.fontSize = Math.min(30, Math.max(14, pr
         </div>
       </PopMenu>
 
+      <button class="icon-btn" :class="{ active: listeningHere }" :title="$t('listen.listenChapter')" :aria-label="$t('listen.listenChapter')" @click="listen"><Headphones /></button>
       <button class="icon-btn hide-sm" :title="$t('nav.search') + ' (Ctrl K)'" @click="reader.paletteOpen = true"><Search /></button>
       <button class="icon-btn" :class="{ active: prefs.studyOpen }" :title="$t('reader.study')" :aria-pressed="prefs.studyOpen" @click="prefs.studyOpen = !prefs.studyOpen">
         <PanelRight />

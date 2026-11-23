@@ -141,4 +141,5 @@ const paragraph = computed(() => settings.prefs.layout === 'paragraph')
 
 .notice { text-align: center; color: var(--text-3); padding: 40px 0; font-size: 15px; }
 .notice small { display: block; margin-top: 8px; font-size: 12px; opacity: 0.8; }
+.verse.speaking { box-shadow: inset 0 -0.12em 0 var(--accent); background-color: var(--accent-soft); }
 </style>

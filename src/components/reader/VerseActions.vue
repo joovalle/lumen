@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Bookmark, BookmarkCheck, Copy, Eraser, GitCompare, Image as ImageIcon, Link2, Share2, StickyNote, X } from 'lucide-vue-next'
+import { Bookmark, BookmarkCheck, Copy, Eraser, GitCompare, Headphones, Image as ImageIcon, Link2, Share2, StickyNote, X } from 'lucide-vue-next'
+import { useSpeech } from '@/stores/speech'
 import { passageText } from '@/composables/passageText'
 import { openShareStudio } from '@/composables/shareStudio'
 import { passageUrl } from '@/composables/links'
@@ -44,6 +45,13 @@ async function selectedText(): Promise<string> {
   const contiguous = sel.every((v, i) => i === 0 || v === sel[i - 1] + 1)
   const url = passageUrl(book, chapter, sel[0], contiguous ? sel[sel.length - 1] : undefined)
   return `«${parts.join(' ')}»\n— ${label.value}${abbr ? ` (${abbr})` : ''}\n${url}`
+}
+
+const speech = useSpeech()
+function listenFrom() {
+  if (!speech.supported) return toast(t('listen.noSupport'), 'error')
+  void speech.start(settings.prefs.bibles[0], reader.passage.book, reader.passage.chapter, reader.selection[0])
+  reader.clear()
 }
 
 async function makeImage() {
@@ -90,6 +98,7 @@ async function bookmark() {
         </div>
         <span class="sep" />
         <button class="act" @click="makeImage"><ImageIcon /><span>{{ $t('selection.image') }}</span></button>
+        <button class="act" @click="listenFrom"><Headphones /><span>{{ $t('more.listen') }}</span></button>
         <button class="act" @click="reader.openStudy('notes')"><StickyNote /><span>{{ $t('selection.note') }}</span></button>
         <button class="act" @click="reader.openStudy('refs')"><Link2 /><span>{{ $t('selection.refs') }}</span></button>
         <button class="act" @click="reader.openStudy('compare')"><GitCompare /><span>{{ $t('selection.compare') }}</span></button>

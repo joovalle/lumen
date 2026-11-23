@@ -3,6 +3,7 @@ import AppNav from '@/components/shell/AppNav.vue'
 import CommandPalette from '@/components/shell/CommandPalette.vue'
 import ToastHost from '@/components/shell/ToastHost.vue'
 import VerseImageStudio from '@/components/share/VerseImageStudio.vue'
+import MiniPlayer from '@/components/shell/MiniPlayer.vue'
 </script>
 
 <template>
@@ -13,6 +14,7 @@ import VerseImageStudio from '@/components/share/VerseImageStudio.vue'
     </div>
     <CommandPalette />
     <VerseImageStudio />
+    <MiniPlayer />
     <ToastHost />
   </div>
 </template>

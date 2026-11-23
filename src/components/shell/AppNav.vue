@@ -1,15 +1,22 @@
 <script setup lang="ts">
-import { BookOpen, CalendarCheck, HandHeart, Library, NotebookPen, Search, Settings, Sunrise } from 'lucide-vue-next'
+import { ref } from 'vue'
+import { BookOpen, CalendarCheck, HandHeart, LayoutGrid, Library, NotebookPen, Search, Settings, Sparkles, Sunrise } from 'lucide-vue-next'
 import LumenLogo from '@/components/common/LumenLogo.vue'
+import MoreSheet from './MoreSheet.vue'
+
+const moreOpen = ref(false)
+/** En el celular, estas secciones viven en «Más» (el botón se marca como activo) */
+const inMore = ['devotional', 'plans', 'plan', 'plan-join', 'library', 'settings', 'about']
 
 const items = [
   { to: '/today', icon: Sunrise, label: 'nav.today', match: 'today', mobile: true },
   { to: '/read', icon: BookOpen, label: 'nav.read', match: 'read', mobile: true },
+  { to: '/devotional', icon: Sparkles, label: 'nav.devotional', match: 'devotional', mobile: false },
   { to: '/plans', icon: CalendarCheck, label: 'nav.plans', match: 'plans', mobile: false },
   { to: '/search', icon: Search, label: 'nav.search', match: 'search', mobile: true },
   { to: '/library', icon: Library, label: 'nav.library', match: 'library', mobile: false },
   { to: '/notes', icon: NotebookPen, label: 'nav.notes', match: 'notes', mobile: true },
-  { to: '/settings', icon: Settings, label: 'nav.settings', match: 'settings', mobile: true },
+  { to: '/settings', icon: Settings, label: 'nav.settings', match: 'settings', mobile: false },
 ]
 </script>
 
@@ -33,7 +40,12 @@ const items = [
       <component :is="it.icon" :stroke-width="1.8" />
       <span>{{ $t(it.label) }}</span>
     </RouterLink>
+    <button class="tab" :class="{ active: moreOpen || inMore.includes(String($route.name)) }" @click="moreOpen = true">
+      <LayoutGrid :stroke-width="1.8" />
+      <span>{{ $t('nav.more') }}</span>
+    </button>
   </nav>
+  <MoreSheet :open="moreOpen" @close="moreOpen = false" />
 </template>
 
 <style scoped>
@@ -74,6 +86,7 @@ const items = [
     border-top: 1px solid var(--border);
   }
   .tab {
+    border: 0; background: transparent; font-family: inherit;
     display: grid; justify-items: center; align-content: center; gap: 3px;
     color: var(--text-3); font-size: 10.5px; font-weight: 600;
   }
